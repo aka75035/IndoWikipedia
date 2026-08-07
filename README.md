@@ -13,7 +13,6 @@ The project is community-driven and welcomes contributions from developers, rese
 * 📚 Read and search articles
 * ✍️ Create and edit articles
 * 🔍 Powerful search
-* 🏷️ Categories and tags
 * 👤 User authentication
 * 📝 Revision history
 * 🌐 Multi-language support *(Planned)*
