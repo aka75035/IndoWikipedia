@@ -1,9 +1,12 @@
+import Hero from "@/components/Home/Hero";
+import CategorySection from "@/components/Home/Categories";
+import FeaturedArticles from "@/components/Home/FeaturedArticles";
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="text-5xl font-bold">
-        IndoWikipedia
-      </h1>
+    <main className="container mx-auto space-y-16 px-4">
+      <Hero />
+      <FeaturedArticles />
+      <CategorySection />
     </main>
   );
 }
