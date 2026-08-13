@@ -1,49 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
-export default function AddArticleForm() {
-  const router = useRouter();
+interface Props {
+  article: {
+    title: string;
+    summary: string;
+    content: string;
+    category: string;
+    slug: string;
+    image: string;
+  };
+}
 
-  const [form, setForm] = useState({
-    title: "",
-    summary: "",
-    content: "",
-    category: "",
-    slug: "",
-    image: "",
-  });
+export default function EditArticleForm({ article }: Props) {
+  const [form, setForm] = useState(article);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
-    setForm((prev) => ({
-      ...prev,
+    setForm({
+      ...form,
       [e.target.name]: e.target.value,
-    }));
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const res = await fetch("/api/articles", {
-      method: "POST",
+    const res = await fetch(`/api/articles/${article.slug}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(form),
     });
 
-    if (!res.ok) {
-      alert("Failed to create article");
-      return;
+    if (res.ok) {
+      alert("Article Updated");
+    } else {
+      alert("Failed");
     }
-
-    alert("Article Created Successfully");
-
-    router.push("/admin");
-    router.refresh();
   }
 
   return (
@@ -53,77 +50,77 @@ export default function AddArticleForm() {
     >
       <div>
         <label className="font-medium">Title</label>
+
         <input
           name="title"
           value={form.title}
           onChange={handleChange}
           className="w-full mt-2 border rounded-lg px-4 py-3"
-          required
         />
       </div>
 
       <div>
         <label className="font-medium">Category</label>
+
         <input
           name="category"
           value={form.category}
           onChange={handleChange}
+          readOnly
           className="w-full mt-2 border rounded-lg px-4 py-3"
-          required
         />
       </div>
 
       <div>
         <label className="font-medium">Slug</label>
+
         <input
           name="slug"
           value={form.slug}
           onChange={handleChange}
           className="w-full mt-2 border rounded-lg px-4 py-3"
-          required
         />
       </div>
 
       <div>
         <label className="font-medium">Image URL</label>
+
         <input
           name="image"
           value={form.image}
           onChange={handleChange}
           className="w-full mt-2 border rounded-lg px-4 py-3"
-          required
         />
       </div>
 
       <div>
         <label className="font-medium">Summary</label>
+
         <textarea
           name="summary"
           rows={4}
           value={form.summary}
           onChange={handleChange}
           className="w-full mt-2 border rounded-lg px-4 py-3"
-          required
         />
       </div>
 
       <div>
         <label className="font-medium">Content</label>
+
         <textarea
           name="content"
           rows={12}
           value={form.content}
           onChange={handleChange}
           className="w-full mt-2 border rounded-lg px-4 py-3"
-          required
         />
       </div>
 
       <button
-        type="submit"
         className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
       >
-        Create Article
+        Update Article
       </button>
     </form>
   );

@@ -6,16 +6,18 @@ import { useRouter } from "next/navigation";
 type SearchBarProps = {
   search: string;
   onSearchChange: (value: string) => void;
+  basePath?: string;
 };
 
 export default function SearchBar({
   search,
   onSearchChange,
+  basePath = "/search",
 }: SearchBarProps) {
   const router = useRouter();
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>){
     if(e.key === "Enter"){
-      router.push(`/search?q=${search}`);
+      router.push(`${basePath}?q=${encodeURIComponent(search)}`);
     }
   }
   return (

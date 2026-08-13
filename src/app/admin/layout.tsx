@@ -21,7 +21,7 @@ const menuItems = [
   },
   {
     title: "Articles",
-    href: "/admin",
+    href: "/admin/articles",
     icon: Newspaper,
   },
   {
