@@ -1,4 +1,5 @@
 import { createArticle, getArticles } from "@/lib/articles";
+import { ArticleSchema } from "@/lib/validations/article";
 
 
 export async function GET() {
@@ -7,13 +8,16 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  try{
+  try {
     const body = await request.json();
 
-    if(!body?.title){
+    const result = ArticleSchema.safeParse(body);
+
+    if (!result.success) {
       return Response.json(
         {
-          message: "Title is required",
+          message: "Invalid article data",
+          errors: result.error.issues,
         },
         {
           status: 400,
@@ -21,13 +25,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const article = await createArticle(body);
+    const article = await createArticle(result.data);
 
-    return Response.json(article,{
-      status:201,
+    return Response.json(article, {
+      status: 201,
     });
-  }catch(error){
+  } catch (error) {
     const err = error as { code?: number };
+
     if (err.code === 11000) {
       return Response.json(
         {
@@ -47,6 +52,5 @@ export async function POST(request: Request) {
         status: 500,
       }
     );
-
   }
 }

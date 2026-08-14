@@ -32,6 +32,8 @@ const ArticleSchema = new Schema({
   timestamps:true,
 });
 
+
+
 const Article = models.Article || mongoose.model("Article", ArticleSchema);
 
 export default Article;

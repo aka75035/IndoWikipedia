@@ -3,21 +3,24 @@ import Link from "next/link";
 import DeleteArticleButton from "./DeleteArticleButton";
 import ArticleSearch from "./ArticleSearch";
 import CategoryFilter from "./CategoryFilter";
+import Pagination from "./Pagination";
 interface Props {
   searchParams: Promise<{
     q?: string;
     category?: string;
+    page?: string;
   }>;
 }
 
 export default async function Articles({searchParams}:Props){
-  let articles;
-  const {q, category} = await searchParams;
-  if(q){
-    articles = await searchArticles(q);
-  }else{
-    articles = await getArticles();
-  }
+  const {q, category, page} = await searchParams;
+  const pageNo = Number(page) || 1;
+  const result =
+    q || category
+      ? await searchArticles(q, category, pageNo)
+      : await getArticles(pageNo);
+  const { articles, total, totalPages } = result;
+
   
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -169,6 +172,7 @@ export default async function Articles({searchParams}:Props){
         </table>
 
     </div>
+    <Pagination page={pageNo} totalPages={totalPages} />
 
 </div>
   );

@@ -1,4 +1,5 @@
 import { deleteArticle, getArticle, updateArticle } from "@/lib/articles";
+import { UpdateArticleSchema } from "@/lib/validations/article";
 
 
 type Props = {
@@ -27,7 +28,19 @@ export async function GET(request: Request, {params}:Props){
 export async function PUT(request: Request,{params}:Props){
   const {slug} = await params;
   const body = await request.json();
-  const article = await updateArticle(slug, body);
+  const result = UpdateArticleSchema.safeParse(body);
+  if (!result.success) {
+    return Response.json(
+      {
+        message: "Invalid article data",
+        errors: result.error.issues,
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+  const article = await updateArticle(slug, result.data);
 
   if(!article){
     return Response.json({
