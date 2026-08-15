@@ -1,4 +1,5 @@
 import { deleteArticle, getArticle, updateArticle } from "@/lib/articles";
+import { requireAdmin } from "@/lib/auth";
 import { UpdateArticleSchema } from "@/lib/validations/article";
 
 
@@ -26,6 +27,21 @@ export async function GET(request: Request, {params}:Props){
 }
 
 export async function PUT(request: Request,{params}:Props){
+  const auth = await requireAdmin();
+
+  if (!auth.user) {
+    return Response.json(
+      {
+        message:
+          auth.status === 401
+            ? "Unauthorized"
+            : "Forbidden",
+      },
+      {
+        status: auth.status,
+      }
+    );
+  }
   const {slug} = await params;
   const body = await request.json();
   const result = UpdateArticleSchema.safeParse(body);
@@ -54,6 +70,21 @@ export async function PUT(request: Request,{params}:Props){
 }
 
 export async function DELETE(request: Request,{params}:Props){
+  const auth = await requireAdmin();
+
+  if (!auth.user) {
+    return Response.json(
+      {
+        message:
+          auth.status === 401
+            ? "Unauthorized"
+            : "Forbidden",
+      },
+      {
+        status: auth.status,
+      }
+    );
+  }
   const {slug} = await params;
   const data = await deleteArticle(slug);
   if(!data){

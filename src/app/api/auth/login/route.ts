@@ -1,10 +1,14 @@
 import { loginSchema } from "@/lib/validations/user";
 import bcrypt from "bcrypt";
 import User from "@/models/User";
+import { cookies } from "next/headers";
+import { createTokenForUser } from "@/lib/auth-token";
+import { connectDB } from "@/lib/mongodb";
 
 
 export async function POST(request: Request){
   try{
+    await connectDB();
     const body = await request.json();
     const result = loginSchema.safeParse(body);
     if(!result.success){
@@ -47,6 +51,22 @@ export async function POST(request: Request){
         )
       )
     }
+
+    const token = await createTokenForUser({
+      userId: user._id.toString(),
+    });
+    console.log(token);
+
+    const cookieStore = await cookies();
+
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60,
+      path: "/",
+    });
+    
     return Response.json(
       {
         message: "success",
