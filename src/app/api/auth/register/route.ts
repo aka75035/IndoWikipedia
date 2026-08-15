@@ -1,10 +1,12 @@
 import { userSchema } from "@/lib/validations/user";
 import bcrypt from "bcrypt";
 import User from "@/models/User";
+import { connectDB } from "@/lib/mongodb";
 
 
 export async function POST(request: Request){
   try{
+    await connectDB();
     const body = await request.json();
     const result = userSchema.safeParse(body);
     if(!result.success){
@@ -32,10 +34,11 @@ export async function POST(request: Request){
         message: "success",
       },
       {
-        status: 200,
+        status: 201,
       }
     )
   } catch (error) {
+    console.error("REGISTER ERROR:", error);
     const err = error as { code?: number };
 
     if (err.code === 11000) {
@@ -52,6 +55,7 @@ export async function POST(request: Request){
     return Response.json(
       {
         message: "Internal Server Error",
+        error: error,
       },
       {
         status: 500,
