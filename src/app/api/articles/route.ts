@@ -1,4 +1,5 @@
 import { createArticle, getArticles } from "@/lib/articles";
+import { requireAdmin } from "@/lib/auth";
 import { ArticleSchema } from "@/lib/validations/article";
 
 
@@ -9,6 +10,22 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin();
+
+    if (!auth.user) {
+      return Response.json(
+        {
+          message:
+            auth.status === 401
+              ? "Unauthorized"
+              : "Forbidden",
+        },
+        {
+          status: auth.status,
+        }
+      );
+    }
+
     const body = await request.json();
 
     const result = ArticleSchema.safeParse(body);
