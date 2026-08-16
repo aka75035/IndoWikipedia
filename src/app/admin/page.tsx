@@ -1,27 +1,71 @@
-import { getArticles } from "@/lib/articles";
-import Link from "next/link";
+import {
+  getArticles,
+  getCategoryCount,
+  getRecentArticles,
+} from "@/lib/articles";
+import {
+  getRecentUsers,
+  getUserCount,
+} from "@/lib/user";
 
-export default async function AdminDashboard(){
-  
+import StatCard from "@/components/Admin/StatCard";
+import RecentArticles from "@/components/Admin/RecentArticles";
+import RecentUsers from "@/components/Admin/RecentUsers";
+
+export default async function AdminDashboard() {
+  const [
+    articleData,
+    userCount,
+    categoryCount,
+    recentArticles,
+    recentUsers,
+  ] = await Promise.all([
+    getArticles(),
+    getUserCount(),
+    getCategoryCount(),
+    getRecentArticles(),
+    getRecentUsers(),
+  ]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">
+          Admin Dashboard
+        </h1>
 
-    {/* Header */}
+        <p className="text-gray-500">
+          Welcome Admin
+        </p>
+      </div>
 
-    <div className="flex items-center justify-between mb-8">
+      {/* Statistics */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          title="Total Articles"
+          value={articleData.total}
+        />
 
-        <div>
-            <h1 className="text-3xl font-bold">
-                Admin Dashboard
-            </h1>
+        <StatCard
+          title="Total Users"
+          value={userCount}
+        />
 
-            <p className="text-gray-500">
-                Welcome Admin
-            </p>
-        </div>
+        <StatCard
+          title="Total Categories"
+          value={categoryCount}
+        />
+      </div>
 
+      {/* Recent Articles */}
+      <div className="mt-6">
+        <RecentArticles articles={recentArticles} />
+      </div>
+
+      {/* Recent Users */}
+      <div className="mt-6">
+        <RecentUsers users={recentUsers} />
+      </div>
     </div>
-
-</div>
   );
 }
