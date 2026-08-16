@@ -1,39 +1,57 @@
 import mongoose, { Schema, models } from "mongoose";
 
-const ArticleSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  summary: {
-    type: String,
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-  slug: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  image: {
-    type: String,
-    required: true,
-  },
-},
-{
-  timestamps:true,
-});
+const ArticleSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 300,
+    },
 
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
 
+    status: {
+      type: String,
+      enum: [
+        "draft",
+        "review",
+        "published",
+        "archived",
+      ],
+      default: "draft",
+      index: true,
+    },
 
-const Article = models.Article || mongoose.model("Article", ArticleSchema);
+    currentRevision: {
+      type: Schema.Types.ObjectId,
+      ref: "ArticleRevision",
+      default: null,
+    },
 
-export default Article;
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+
+    publishedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default models.Article ||
+  mongoose.model("Article", ArticleSchema);
