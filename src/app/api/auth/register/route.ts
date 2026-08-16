@@ -1,50 +1,81 @@
-import { userSchema } from "@/lib/validations/user";
 import bcrypt from "bcrypt";
+
 import User from "@/models/User";
+
 import { connectDB } from "@/lib/mongodb";
 
+import { userSchema, } from "@/lib/validations/user";
 
-export async function POST(request: Request){
-  try{
+
+export async function POST(
+  request: Request
+) {
+  try {
     await connectDB();
+
     const body = await request.json();
+
     const result = userSchema.safeParse(body);
-    if(!result.success){
+
+    if (!result.success) {
       return Response.json(
         {
-          message: "Invalid User Data",
-          errors: result.error.issues,
+          success: false,
+          message: "Invalid user data",
+          errors:
+            result.error.issues,
         },
         {
           status: 400,
         }
       );
     }
-    const password = result.data.password;
-    const passwordHash = await bcrypt.hash(password, 10);
 
+    const {username, email, password, displayName, } = result.data;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+  
     const user = await User.create({
-      name: result.data.name,
-      email: result.data.email,
-      passwordHash,
-    })
+        username,
+        email,
+        password: hashedPassword,
+        displayName,
+      });
+
     return Response.json(
       {
-        message: "success",
+        success: true,
+        message:
+          "User registered successfully",
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+        },
       },
       {
         status: 201,
       }
-    )
+    );
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    const err = error as { code?: number };
+    console.error(
+      "REGISTER ERROR:",
+      error
+    );
+
+    const err =
+      error as {
+        code?: number;
+      };
 
     if (err.code === 11000) {
       return Response.json(
         {
-          message: "An user with this email already exists.",
+          success: false,
+          message:
+            "Username or email already exists.",
         },
         {
           status: 409,
@@ -54,8 +85,9 @@ export async function POST(request: Request){
 
     return Response.json(
       {
-        message: "Internal Server Error",
-        error: error,
+        success: false,
+        message:
+          "Internal Server Error",
       },
       {
         status: 500,

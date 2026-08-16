@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   Newspaper,
   FolderTree,
   Users,
   Settings,
-  LogOut,
 } from "lucide-react";
+import LogoutButton from "./logout";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -41,21 +43,45 @@ const menuItems = [
   },
 ];
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: AdminLayoutProps) {
-  return (
-    <div className="min-h-screen flex bg-slate-100">
-      {/* Sidebar */}
-      <aside className="w-72 bg-slate-900 text-white flex flex-col">
+  const user = await getCurrentUser();
 
-        <div className="h-20 flex items-center justify-center border-b border-slate-700">
+  if (!user) {
+    redirect("/login");
+  }
+
+  if (user.role !== "admin") {
+    redirect("/");
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-100">
+      <aside className="flex h-[calc(100vh-48px)] w-72 shrink-0 flex-col bg-slate-900 text-white">
+        
+        {/* Header */}
+        <div className="flex h-20 shrink-0 items-center justify-center border-b border-slate-700">
           <h1 className="text-2xl font-bold">
             Admin Panel
           </h1>
         </div>
 
-        <nav className="flex-1 p-5 space-y-2">
+        {/* User */}
+        <div className="shrink-0 border-b border-slate-700 p-5">
+          <p className="font-semibold">{user.name}</p>
+
+          <p className="text-sm text-slate-400">
+            {user.email}
+          </p>
+
+          <p className="mt-1 text-xs uppercase text-slate-500">
+            {user.role}
+          </p>
+        </div>
+
+        {/* Navigation */}
+        <nav className="min-h-0 flex-1 overflow-y-auto p-5 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
 
@@ -63,7 +89,7 @@ export default function AdminLayout({
               <Link
                 key={item.title}
                 href={item.href}
-                className="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-slate-800 transition"
+                className="flex items-center gap-3 rounded-lg px-4 py-3 transition hover:bg-slate-800"
               >
                 <Icon size={20} />
                 <span>{item.title}</span>
@@ -72,16 +98,13 @@ export default function AdminLayout({
           })}
         </nav>
 
-        <div className="p-5 border-t border-slate-700">
-          <button className="w-full flex items-center gap-3 rounded-lg px-4 py-3 bg-red-500 hover:bg-red-600 transition">
-            <LogOut size={20} />
-            Logout
-          </button>
+        {/* Logout */}
+        <div className="shrink-0 border-t border-slate-700 p-5">
+          <LogoutButton />
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto text-black font-black">
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-8 text-black">
         {children}
       </main>
     </div>

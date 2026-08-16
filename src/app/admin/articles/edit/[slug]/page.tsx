@@ -1,14 +1,16 @@
-import { notFound } from "next/navigation";
 import { getArticle } from "@/lib/articles";
+import { notFound } from "next/navigation";
 import EditArticleForm from "./EditArticleForm";
 
-interface Props {
+type Props = {
   params: Promise<{
     slug: string;
   }>;
-}
+};
 
-export default async function EditArticlePage({ params }: Props) {
+export default async function EditArticlePage({
+  params,
+}: Props) {
   const { slug } = await params;
 
   const article = await getArticle(slug);
@@ -18,12 +20,28 @@ export default async function EditArticlePage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-6">
-      <h1 className="text-3xl font-bold mb-8">
-        Edit Article
-      </h1>
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mb-8">
+        <p className="text-sm font-medium text-blue-600">
+          Administration
+        </p>
 
-      <EditArticleForm article={JSON.parse(JSON.stringify(article))} />
+        <h1 className="mt-1 text-3xl font-bold text-slate-900">
+          Edit Article
+        </h1>
+
+        <p className="mt-2 text-slate-500">
+          Update the encyclopedic information,
+          sections, references, and publishing
+          settings.
+        </p>
+      </div>
+
+      <EditArticleForm
+        article={JSON.parse(
+          JSON.stringify(article)
+        )}
+      />
     </div>
   );
 }
