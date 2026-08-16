@@ -2,42 +2,83 @@ import mongoose, { Schema, models } from "mongoose";
 
 const UserSchema = new Schema(
   {
-    name: {
+    username: {
       type: String,
-      required: [true, "Name is required"],
+      required: true,
+      unique: true,
       trim: true,
-      minlength: [1, "Name cannot be empty"],
-      maxlength: [100, "Name cannot exceed 100 characters"],
+      minlength: 3,
+      maxlength: 50,
     },
 
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
       lowercase: true,
       trim: true,
     },
 
-    passwordHash: {
+    password: {
       type: String,
-      required: [true, "Password hash is required"],
-      select: false,
+      required: true,
+    },
+
+    displayName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    avatar: {
+      type: String,
+      default: null,
+    },
+
+    bio: {
+      type: String,
+      default: "",
+      maxlength: 1000,
     },
 
     role: {
       type: String,
-      enum: {
-        values: ["user", "author", "admin"],
-        message: "Invalid user role",
-      },
+      enum: [
+        "user",
+        "contributor",
+        "editor",
+        "moderator",
+        "admin",
+      ],
       default: "user",
+      index: true,
+    },
+
+    status: {
+      type: String,
+      enum: [
+        "active",
+        "suspended",
+        "banned",
+      ],
+      default: "active",
+    },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    lastLoginAt: {
+      type: Date,
+      default: null,
     },
   },
+
   {
     timestamps: true,
   }
 );
 
-const User = models.User || mongoose.model("User", UserSchema);
-
-export default User;
+export default models.User ||
+  mongoose.model("User", UserSchema);

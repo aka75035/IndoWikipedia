@@ -1,24 +1,47 @@
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET() {
-  const auth = await requireAdmin();
+  try {
+    const auth = await requireAdmin();
 
-  if (!auth.user) {
+    if (!auth.user) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            auth.status === 401
+              ? "Unauthorized"
+              : "Forbidden",
+        },
+        {
+          status: auth.status,
+        }
+      );
+    }
+
     return Response.json(
       {
-        message:
-          auth.status === 401
-            ? "Unauthorized"
-            : "Forbidden",
+        success: true,
+        user: auth.user,
       },
       {
-        status: auth.status,
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Get admin profile error:",
+      error
+    );
+
+    return Response.json(
+      {
+        success: false,
+        message: "Internal Server Error",
+      },
+      {
+        status: 500,
       }
     );
   }
-
-  return Response.json(
-    { user: auth.user },
-    { status: 200 }
-  );
 }

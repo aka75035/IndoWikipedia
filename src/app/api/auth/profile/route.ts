@@ -1,104 +1,174 @@
 import { requireLoggedInUser } from "@/lib/auth";
 import User from "@/models/User";
 import { updateProfileSchema } from "@/lib/validations/user";
-import { connectDB } from "@/lib/mongodb";
 
+/**
+ * GET /api/profile
+ *
+ * Get current authenticated user.
+ */
 export async function GET() {
-  await connectDB();
-  const auth = await requireLoggedInUser();
+  try {
+    const auth = await requireLoggedInUser();
 
-  if (!auth.user) {
-    return Response.json(
-      {
-        message: "Unauthorized",
-      },
-      {
-        status: 401,
-      }
-    );
-  }
-
-  const user = await User.findById(auth.user._id).select(
-    "-passwordHash"
-  );
-
-  if (!user) {
-    return Response.json(
-      {
-        message: "User not found",
-      },
-      {
-        status: 404,
-      }
-    );
-  }
-
-  return Response.json(
-    {
-      user,
-    },
-    {
-      status: 200,
+    if (!auth.user) {
+      return Response.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
     }
-  );
+
+    const user = await User.findById(
+      auth.user._id
+    ).select("-password");
+
+    if (!user) {
+      return Response.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    return Response.json(
+      {
+        success: true,
+        user,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Get profile error:",
+      error
+    );
+
+    return Response.json(
+      {
+        success: false,
+        message: "Internal Server Error",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 }
 
-export async function PUT(request: Request) {
-  await connectDB();
-  const auth = await requireLoggedInUser();
 
-  if (!auth.user) {
-    return Response.json(
-      {
-        message: "Unauthorized",
-      },
-      {
-        status: 401,
-      }
-    );
-  }
+/**
+ * PUT /api/profile
+ *
+ * Update current authenticated user's profile.
+ */
+export async function PUT(
+  request: Request
+) {
+  try {
+    const auth =
+      await requireLoggedInUser();
 
-  const body = await request.json();
-
-  const result = updateProfileSchema.safeParse(body);
-
-  if (!result.success) {
-    return Response.json(
-      {
-        message: "Invalid user data",
-        errors: result.error.issues,
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  const user = await User.findByIdAndUpdate(
-    auth.user._id,
-    result.data,
-    {
-      new: true,
+    if (!auth.user) {
+      return Response.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
     }
-  ).select("-passwordHash");
 
-  if (!user) {
+    /**
+     * Parse request body
+     */
+    const body =
+      await request.json();
+
+    /**
+     * Validate
+     */
+    const result =
+      updateProfileSchema.safeParse(
+        body
+      );
+
+    if (!result.success) {
+      return Response.json(
+        {
+          success: false,
+          message: "Invalid user data",
+          errors:
+            result.error.issues,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /**
+     * Update only allowed profile fields
+     */
+    const user =
+      await User.findByIdAndUpdate(
+        auth.user._id,
+        result.data,
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).select("-password");
+
+    if (!user) {
+      return Response.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
     return Response.json(
       {
-        message: "User not found",
+        success: true,
+        message:
+          "Profile updated successfully",
+        user,
       },
       {
-        status: 404,
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Update profile error:",
+      error
+    );
+
+    return Response.json(
+      {
+        success: false,
+        message: "Internal Server Error",
+      },
+      {
+        status: 500,
       }
     );
   }
-
-  return Response.json(
-    {
-      user,
-    },
-    {
-      status: 200,
-    }
-  );
 }
