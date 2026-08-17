@@ -846,9 +846,11 @@ function compareInfobox(
       removed: cleanObject(from),
     };
   }
+    if (!from || !to) {
+    throw new Error("Invalid infobox comparison state");
+  }
 
-  const oldFields: AnyObject[] =
-    from.fields ?? [];
+  const oldFields: AnyObject[] = from.fields ?? [];
 
   const newFields: AnyObject[] =
     to.fields ?? [];
@@ -969,11 +971,9 @@ function compareReferences(
   from: AnyObject[] = [],
   to: AnyObject[] = []
 ) {
-  const oldReferences =
-    from.map(cleanObject);
+  const oldReferences = from.map((value) => cleanObject(value));
 
-  const newReferences =
-    to.map(cleanObject);
+  const newReferences = to.map((value) => cleanObject(value));
 
   const usedOld = new Set<number>();
   const usedNew = new Set<number>();
@@ -1152,11 +1152,9 @@ function compareSimpleArrays(
   from: any[] = [],
   to: any[] = []
 ) {
-  const oldValues =
-    from.map(cleanObject);
+  const oldValues = from.map((value) => cleanObject(value));
 
-  const newValues =
-    to.map(cleanObject);
+  const newValues = to.map((value) => cleanObject(value));
 
   const usedOld = new Set<number>();
   const usedNew = new Set<number>();
