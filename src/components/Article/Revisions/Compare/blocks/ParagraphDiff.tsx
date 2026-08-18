@@ -1,8 +1,10 @@
 import TextDiff from "./TextDiff";
 
+import type { RevisionBlock } from "@/types/article-diff";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
 export default function ParagraphDiff({
@@ -12,7 +14,7 @@ export default function ParagraphDiff({
   if (!to) {
     return (
       <p className="whitespace-pre-wrap text-sm leading-7 text-slate-700">
-        {from.content}
+        {String(from.content ?? "")}
       </p>
     );
   }

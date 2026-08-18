@@ -24,3 +24,5 @@ WatchlistSchema.index(
   { user: 1, article: 1 },
   { unique: true }
 );
+
+export default models.Watchlist || mongoose.model("Watchlist", WatchlistSchema);

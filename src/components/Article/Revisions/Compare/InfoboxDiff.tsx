@@ -1,15 +1,14 @@
 import TextDiff from "./blocks/TextDiff";
+import type {
+  InfoboxData,
+  InfoboxField,
+} from "@/types/article-diff";
 
 type Props = {
-  from?: any;
-  to?: any;
+  from?: InfoboxData;
+  to?: InfoboxData;
 };
 
-type Field = {
-  label?: string;
-  value?: string;
-  order?: number;
-};
 
 function Value({
   value,
@@ -77,8 +76,8 @@ function FieldDiff({
   from,
   to,
 }: {
-  from?: Field;
-  to?: Field;
+  from?: InfoboxField;
+  to?: InfoboxField;
 }) {
   if (!from && to) {
     return (
@@ -207,7 +206,7 @@ export default function InfoboxDiff({
             <div className="space-y-3">
               {to.fields.map(
                 (
-                  field: Field,
+                  field: InfoboxField,
                   index: number
                 ) => (
                   <FieldDiff
@@ -259,7 +258,7 @@ export default function InfoboxDiff({
             <div className="space-y-3">
               {from.fields.map(
                 (
-                  field: Field,
+                  field: InfoboxField,
                   index: number
                 ) => (
                   <FieldDiff
@@ -285,10 +284,10 @@ export default function InfoboxDiff({
     return null;
   }
 
-  const fieldsFrom: Field[] =
+  const fieldsFrom: InfoboxField[] =
     from.fields ?? [];
 
-  const fieldsTo: Field[] =
+  const fieldsTo: InfoboxField[] =
     to.fields ?? [];
 
   /**

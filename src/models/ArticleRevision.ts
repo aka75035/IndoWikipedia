@@ -384,8 +384,4 @@ ArticleRevisionSchema.index(
 );
 
 
-export default models.ArticleRevision ||
-  mongoose.model(
-    "ArticleRevision",
-    ArticleRevisionSchema
-  );
+export default models.ArticleRevision || mongoose.model("ArticleRevision", ArticleRevisionSchema);

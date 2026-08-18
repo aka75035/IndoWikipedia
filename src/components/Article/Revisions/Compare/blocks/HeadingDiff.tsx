@@ -1,8 +1,10 @@
 import TextDiff from "./TextDiff";
 
+import type { RevisionBlock } from "@/types/article-diff";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
 export default function HeadingDiff({
@@ -12,7 +14,7 @@ export default function HeadingDiff({
   if (!to) {
     return (
       <h4 className="text-lg font-semibold text-slate-900">
-        {from.content}
+        {String(from.content ?? "")}
       </h4>
     );
   }

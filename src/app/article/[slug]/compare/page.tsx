@@ -24,6 +24,63 @@ type Props = {
   }>;
 };
 
+
+function displayValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "—";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+
+
+function getCategoryLabel(category: unknown): string {
+  if (typeof category === "string") {
+    return category;
+  }
+
+  if (
+    typeof category === "object" &&
+    category !== null
+  ) {
+    const value = category as Record<
+      string,
+      unknown
+    >;
+
+    if (typeof value.name === "string") {
+      return value.name;
+    }
+
+    if (typeof value.title === "string") {
+      return value.title;
+    }
+  }
+
+  try {
+    return JSON.stringify(category);
+  } catch {
+    return String(category);
+  }
+}
+
 export default async function ComparePage({
   params,
   searchParams,
@@ -110,7 +167,7 @@ export default async function ComparePage({
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            You don't have permission to view this
+            You don&apos;t have permission to view this
             article.
           </p>
         </div>
@@ -145,7 +202,7 @@ export default async function ComparePage({
 
           <p className="mt-2 text-sm text-red-700">
             One or both of the requested revisions
-            don't exist.
+            don&apos;t exist.
           </p>
 
           <Link
@@ -245,7 +302,7 @@ export default async function ComparePage({
                   </p>
 
                   <p className="text-sm text-red-900 line-through">
-                    {changes.title.from}
+                    {displayValue(changes.title.from)}
                   </p>
                 </div>
 
@@ -255,7 +312,7 @@ export default async function ComparePage({
                   </p>
 
                   <p className="text-sm text-green-900">
-                    {changes.title.to}
+                    {displayValue(changes.title.to)}
                   </p>
                 </div>
               </div>
@@ -276,7 +333,7 @@ export default async function ComparePage({
                   </p>
 
                   <p className="text-sm leading-6 text-red-900">
-                    {changes.summary.from}
+                    {displayValue(changes.summary.from)}
                   </p>
                 </div>
 
@@ -286,7 +343,7 @@ export default async function ComparePage({
                   </p>
 
                   <p className="text-sm leading-6 text-green-900">
-                    {changes.summary.to}
+                    {displayValue(changes.summary.to)}
                   </p>
                 </div>
               </div>
@@ -329,21 +386,16 @@ export default async function ComparePage({
                     <div className="flex flex-wrap gap-2">
                       {changes.categories.added.map(
                         (
-                          category: any,
+                          category: unknown,
                           index: number
                         ) => (
                           <span
                             key={`added-${index}`}
                             className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-800"
                           >
-                            {typeof category ===
-                            "string"
-                              ? category
-                              : category.name ??
-                                category.title ??
-                                JSON.stringify(
-                                  category
-                                )}
+                            {getCategoryLabel(
+                              category
+                            )}
                           </span>
                         )
                       )}
@@ -361,21 +413,16 @@ export default async function ComparePage({
                     <div className="flex flex-wrap gap-2">
                       {changes.categories.removed.map(
                         (
-                          category: any,
+                          category: unknown,
                           index: number
                         ) => (
                           <span
                             key={`removed-${index}`}
                             className="rounded-full bg-red-100 px-3 py-1 text-sm text-red-800 line-through"
                           >
-                            {typeof category ===
-                            "string"
-                              ? category
-                              : category.name ??
-                                category.title ??
-                                JSON.stringify(
-                                  category
-                                )}
+                            {getCategoryLabel(
+                              category
+                            )}
                           </span>
                         )
                       )}

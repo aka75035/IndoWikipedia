@@ -1,12 +1,10 @@
 import ChangeBadge from "./ChangeBadge";
 import BlockRenderer from "./BlockRenderer";
 
+import type { BlockChanges, } from "@/types/article-diff";
+
 type Props = {
-  changes: {
-    added?: any[];
-    removed?: any[];
-    modified?: any[];
-  };
+  changes: BlockChanges;
 };
 
 export default function BlockChanges({

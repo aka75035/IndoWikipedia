@@ -1,8 +1,10 @@
 import TextDiff from "./blocks/TextDiff";
+import type { ArticleReference } from "@/types/article-diff";
+
 
 type Props = {
-  from?: any;
-  to?: any;
+  from?: ArticleReference;
+  to?: ArticleReference;
 };
 
 function Value({

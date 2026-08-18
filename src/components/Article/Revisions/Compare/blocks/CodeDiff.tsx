@@ -1,7 +1,43 @@
-type Props = {
-  from: any;
-  to?: any;
+import type {
+  CodeContent,
+  RevisionBlock,
+} from "@/types/article-diff";
+
+type CodeBlock = RevisionBlock & {
+  content: CodeContent;
 };
+
+type Props = {
+  from: RevisionBlock;
+  to?: RevisionBlock;
+};
+
+function getCodeContent(
+  content: unknown
+): CodeContent {
+  if (
+    typeof content !== "object" ||
+    content === null
+  ) {
+    return {};
+  }
+
+  const value = content as Record<
+    string,
+    unknown
+  >;
+
+  return {
+    code:
+      typeof value.code === "string"
+        ? value.code
+        : undefined,
+    language:
+      typeof value.language === "string"
+        ? value.language
+        : undefined,
+  };
+}
 
 function CodeBlock({
   code,
@@ -51,8 +87,8 @@ export default function CodeDiff({
   from,
   to,
 }: Props) {
-  const oldContent = from?.content ?? {};
-  const newContent = to?.content ?? {};
+  const oldContent = getCodeContent(from?.content);
+  const newContent = to ? getCodeContent(to.content) : {};
 
   /*
    * Removed code block.

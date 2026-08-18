@@ -1,13 +1,10 @@
 import ChangeBadge from "./ChangeBadge";
 import BlockChanges from "./BlockChanges";
 import CollapsibleSection from "./CollapsibleSection";
+import type { SectionChanges } from "@/types/article-diff";
 
 type Props = {
-  changes: {
-    added?: any[];
-    removed?: any[];
-    modified?: any[];
-  };
+  changes: SectionChanges;
 };
 
 export default function SectionChanges({

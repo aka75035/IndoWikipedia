@@ -14,6 +14,9 @@ type Props = {
   params: Promise<{
     slug: string;
   }>;
+  searchParams: Promise<{
+    page?: string;
+  }>;
 };
 
 type Revision = {
@@ -32,8 +35,13 @@ type Revision = {
 
 export default async function RevisionHistoryPage({
   params,
+  searchParams,
 }: Props) {
   const { slug } = await params;
+  const { page: pageParam } = await searchParams;
+  const page = pageParam ? Number(pageParam) : 1;
+
+  const currentPage = Number.isInteger(page) && page > 0 ? page : 1;
 
   const article = await getArticle(slug);
 
@@ -49,7 +57,7 @@ export default async function RevisionHistoryPage({
 
   const result = await getArticleRevisions(
     article._id.toString(),
-    1
+    currentPage,
   );
 
   const revisions =
@@ -263,6 +271,7 @@ export default async function RevisionHistoryPage({
           </div>
         )}
       </div>
+      {/* <Pagination page={page} totalPages={totalPages} /> */}
     </main>
   );
 }

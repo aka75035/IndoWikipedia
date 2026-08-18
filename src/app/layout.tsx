@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar/Navbar";
+import { getCurrentUser } from "@/lib/auth";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -18,14 +19,27 @@ export const metadata: Metadata = {
   description: "A Wikipedia-style knowledge platform",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({
+  children,
+}: LayoutProps<"/">) {
+  const currentUser = await getCurrentUser();
+
+  const user = currentUser
+    ? {
+        _id: currentUser._id.toString(),
+        username: currentUser.username,
+        displayName: currentUser.displayName,
+        role: currentUser.role,
+      }
+    : null;
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <Navbar />
+        <Navbar user={user} />
         {children}
       </body>
     </html>

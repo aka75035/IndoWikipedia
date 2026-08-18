@@ -9,9 +9,11 @@ import TableDiff from "./blocks/TableDiff";
 import CodeDiff from "./blocks/CodeDiff";
 import MathDiff from "./blocks/MathDiff";
 
-type Props = {
-  block: any;
-  compareWith?: any;
+import type { RevisionBlock } from "@/types/article-diff";
+
+type Props = { 
+  block: RevisionBlock;
+  compareWith?: RevisionBlock;
 };
 
 export default function BlockRenderer({

@@ -13,6 +13,8 @@ import { type CreateArticleInput, type UpdateArticleInput,} from "@/lib/validati
 import {type CreateRevisionInput, } from "@/lib/validations/revision";import { compareRevisionData } from "./article-diff.service";
 ;
 
+type RevisionData = Record<string, unknown>;
+
 const ARTICLES_PER_PAGE = 10;
 
 /**
@@ -128,11 +130,7 @@ export async function createArticle(
     );
   }
 
-  /**
-   * Create Article
-   */
-  const article =
-    await Article.create({
+  const article = await Article.create({
       title: body.title,
       slug: normalizeSlug(body.slug),
       status: "draft",
@@ -442,8 +440,8 @@ export async function createRevision(
   /**
    * Validate categories
    */
-  const categoryIds =
-    body.categories ?? [];
+  const categoryIds = body.categories?.length ? body.categories
+    : latestRevision?.categories ?? [];
 
   if (categoryIds.length > 0) {
     const categories =
@@ -476,14 +474,11 @@ export async function createRevision(
       summary:
         body.summary ?? "",
 
-      sections:
-        body.sections ?? [],
+      sections: body.sections ?? [],
 
-      infobox:
-        body.infobox ?? null,
+      infobox: body.infobox ?? null,
 
-      references:
-        body.references ?? [],
+      references: body.references ?? [],
 
       categories: categoryIds,
 
@@ -580,7 +575,6 @@ export async function submitArticleForReview(
 
 export async function publishArticle(
   slug: string,
-  reviewerId: string
 ) {
   await connectDB();
 
@@ -739,44 +733,110 @@ export async function getPublishedArticles(
   };
 }
 
-function getBlockIdentity(block: any) {
-  const content = block.content;
-
-  switch (block.type) {
-    case "image":
-    case "video":
-    case "link":
-      return `${block.type}:${content?.url ?? ""}`;
-
-    case "code":
-      return `code:${content?.language ?? ""}:${content?.code ?? ""}`;
-
-    case "math":
-    case "paragraph":
-    case "heading":
-      return `${block.type}:${String(content ?? "")}`;
-
-    case "list":
-    case "ordered-list":
-      return `${block.type}:${JSON.stringify(content ?? [])}`;
-
-    case "table":
-      return `table:${JSON.stringify(content ?? {})}`;
-
-    case "quote":
-      return `quote:${String(content ?? "")}`;
-
-    default:
-      return `${block.type}:${JSON.stringify(content ?? null)}`;
-  }
-}
 
 export function compareRevisions(
-  fromRevision: any,
-  toRevision: any
+  fromRevision: RevisionData,
+  toRevision: RevisionData
 ) {
   return compareRevisionData(
     fromRevision,
     toRevision
   );
+}
+
+export async function getFeaturedArticles(
+  limit = 6
+) {
+  await connectDB();
+
+  return Article.find({
+    status: "published",
+    isFeatured: true,
+  })
+    .populate(
+      "currentRevision",
+      "title summary"
+    )
+    .sort({
+      publishedAt: -1,
+    })
+    .limit(limit)
+    .lean();
+}
+
+export async function setArticleFeatured(
+  slug: string,
+  isFeatured: boolean
+) {
+  await connectDB();
+
+  return Article.findOneAndUpdate(
+    {
+      slug: normalizeSlug(slug),
+    },
+    {
+      $set: {
+        isFeatured,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+    .populate(
+      "createdBy",
+      "username displayName avatar"
+    )
+    .populate("currentRevision");
+}
+
+export async function getLatestArticles(
+  limit = 6
+) {
+  await connectDB();
+
+  return Article.find({
+    status: "published",
+  })
+    .sort({
+      publishedAt: -1,
+      createdAt: -1,
+    })
+    .limit(limit)
+    .populate({
+      path: "currentRevision",
+      select: "title summary categories",
+      populate: {
+        path: "categories",
+        select: "name slug",
+        model: Category,
+      },
+    })
+    .lean();
+}
+
+export async function getArticleForEditing(
+  slug: string
+) {
+  await connectDB();
+
+  const article = await Article.findOne({
+    slug: normalizeSlug(slug),
+  })
+    .populate({
+      path: "currentRevision",
+      populate: {
+        path: "categories",
+        select: "name slug description",
+        model: Category,
+      },
+    })
+    .populate(
+      "createdBy",
+      "username displayName avatar"
+    )
+    .lean();
+
+  return article;
 }

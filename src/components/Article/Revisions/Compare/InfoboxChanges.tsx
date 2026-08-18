@@ -1,8 +1,14 @@
 import CollapsibleSection from "./CollapsibleSection";
 import InfoboxDiff from "./InfoboxDiff";
 
+import type {
+  InfoboxChanges as InfoboxChangesType,
+  InfoboxField,
+  InfoboxFieldChange,
+} from "@/types/article-diff";
+
 type Props = {
-  changes: any;
+  changes: InfoboxChangesType;
 };
 
 export default function InfoboxChanges({
@@ -10,6 +16,29 @@ export default function InfoboxChanges({
 }: Props) {
   if (!changes) {
     return null;
+  }
+  function displayValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return "—";
+    }
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      typeof value === "bigint"
+    ) {
+      return String(value);
+    }
+
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
   }
 
   const hasChanges =
@@ -26,15 +55,8 @@ export default function InfoboxChanges({
     return null;
   }
 
-  /**
-   * Newer API format:
-   *
-   * {
-   *   changed: true,
-   *   added: {...},
-   *   removed: {...}
-   * }
-   */
+
+  
   if (
     changes.added ||
     changes.removed
@@ -83,7 +105,7 @@ export default function InfoboxChanges({
                 </p>
 
                 <p className="text-sm text-red-900 line-through">
-                  {changes.title.from ?? "—"}
+                  {displayValue(changes.title.from)}
                 </p>
               </div>
 
@@ -93,7 +115,7 @@ export default function InfoboxChanges({
                 </p>
 
                 <p className="text-sm text-green-900">
-                  {changes.title.to ?? "—"}
+                  {displayValue(changes.title.to)}
                 </p>
               </div>
             </div>
@@ -113,7 +135,7 @@ export default function InfoboxChanges({
                 </p>
 
                 <p className="break-all text-sm text-red-900 line-through">
-                  {changes.image.from ?? "—"}
+                  {displayValue(changes.image.from)}
                 </p>
               </div>
 
@@ -123,7 +145,7 @@ export default function InfoboxChanges({
                 </p>
 
                 <p className="break-all text-sm text-green-900">
-                  {changes.image.to ?? "—"}
+                  {displayValue(changes.image.to)}
                 </p>
               </div>
             </div>
@@ -138,7 +160,7 @@ export default function InfoboxChanges({
 
             <div className="space-y-3">
               {changes.fields.added?.map(
-                (field: any, index: number) => (
+                (field: InfoboxField, index: number) => (
                   <InfoboxDiff
                     key={`added-${index}`}
                     to={{
@@ -149,7 +171,7 @@ export default function InfoboxChanges({
               )}
 
               {changes.fields.removed?.map(
-                (field: any, index: number) => (
+                (field: InfoboxField, index: number) => (
                   <InfoboxDiff
                     key={`removed-${index}`}
                     from={{
@@ -160,7 +182,7 @@ export default function InfoboxChanges({
               )}
 
               {changes.fields.modified?.map(
-                (field: any, index: number) => (
+                (field: InfoboxFieldChange, index: number) => (
                   <div
                     key={`modified-${index}`}
                     className="rounded-lg border border-blue-200 bg-blue-50 p-4"
@@ -180,7 +202,7 @@ export default function InfoboxChanges({
                         </p>
 
                         <p className="mt-1 text-sm text-red-900">
-                          {field.from?.value ?? "—"}
+                          {displayValue(field.from?.value)}
                         </p>
                       </div>
 
@@ -194,7 +216,7 @@ export default function InfoboxChanges({
                         </p>
 
                         <p className="mt-1 text-sm text-green-900">
-                          {field.to?.value ?? "—"}
+                          {displayValue(field.to?.value)}
                         </p>
                       </div>
                     </div>

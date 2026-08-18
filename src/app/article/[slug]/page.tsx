@@ -2,6 +2,7 @@ import { getArticle } from "@/lib/articles";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   params: Promise<{
@@ -102,9 +103,11 @@ export default async function ArticlePage({
             {/* Image */}
             {article.image && (
               <figure className="mb-10 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <img
+                <Image
                   src={article.image}
                   alt={article.title}
+                  width={1200}
+                  height={550}
                   className="max-h-[550px] w-full object-cover"
                 />
 

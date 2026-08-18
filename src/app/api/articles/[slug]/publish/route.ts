@@ -59,11 +59,7 @@ export async function POST(
 
     const { slug } = await params;
 
-    const article =
-      await publishArticle(
-        slug,
-        auth.user._id.toString()
-      );
+    const article = await publishArticle(slug);
 
     return Response.json(
       {

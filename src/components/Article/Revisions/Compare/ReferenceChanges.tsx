@@ -1,12 +1,14 @@
 import ReferenceDiff from "./ReferenceDiff";
 import CollapsibleSection from "./CollapsibleSection";
 
+import type {
+  ArticleReference,
+  ReferenceChange,
+  ReferenceChanges as ReferenceChangesType,
+} from "@/types/article-diff";
+
 type Props = {
-  changes: {
-    added?: any[];
-    removed?: any[];
-    modified?: any[];
-  };
+  changes: ReferenceChangesType;
 };
 
 export default function ReferenceChanges({
@@ -51,7 +53,7 @@ export default function ReferenceChanges({
             <div className="space-y-4">
               {added.map(
                 (
-                  reference: any,
+                  reference: ArticleReference,
                   index: number
                 ) => (
                   <ReferenceDiff
@@ -77,7 +79,7 @@ export default function ReferenceChanges({
             <div className="space-y-4">
               {removed.map(
                 (
-                  reference: any,
+                  reference: ArticleReference,
                   index: number
                 ) => (
                   <ReferenceDiff
@@ -103,7 +105,7 @@ export default function ReferenceChanges({
             <div className="space-y-4">
               {modified.map(
                 (
-                  change: any,
+                  change: ReferenceChange,
                   index: number
                 ) => (
                   <ReferenceDiff

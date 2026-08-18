@@ -1,4 +1,11 @@
+"use client";
+
+import { useState } from "react";
+import SearchBar from "@/components/Navbar/SearchBar";
+
 export default function Hero() {
+  const [search, setSearch] = useState("");
+
   return (
     <section className="relative overflow-hidden py-16 md:py-24">
       <div className="mx-auto max-w-4xl text-center">
@@ -20,7 +27,10 @@ export default function Hero() {
         </p>
 
         <div className="mx-auto mt-8 max-w-2xl">
-          {/* SearchBar goes here later */}
+          <SearchBar
+            search={search}
+            onSearchChange={setSearch}
+          />
         </div>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">

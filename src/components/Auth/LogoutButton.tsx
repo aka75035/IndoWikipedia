@@ -8,9 +8,12 @@ export default function LogoutButton() {
 
   async function handleLogout() {
     try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      const response = await fetch(
+        "/api/auth/logout",
+        {
+          method: "POST",
+        }
+      );
 
       if (!response.ok) {
         console.error("Logout failed");
@@ -20,7 +23,10 @@ export default function LogoutButton() {
       router.push("/login");
       router.refresh();
     } catch (error) {
-      console.error("Logout request failed:", error);
+      console.error(
+        "Logout request failed:",
+        error
+      );
     }
   }
 
@@ -28,9 +34,9 @@ export default function LogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="w-full flex items-center gap-3 rounded-lg px-4 py-3 bg-red-500 hover:bg-red-600 transition"
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 transition hover:bg-red-50"
     >
-      <LogOut size={20} />
+      <LogOut size={16} />
       Logout
     </button>
   );

@@ -4,7 +4,7 @@ export const NAV_ITEMS = [
     href: "/",
   },
   {
-    label: "Categories",
+    label: "All Categories",
     href: "/categories",
   },
   {

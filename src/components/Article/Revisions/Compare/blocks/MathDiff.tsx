@@ -1,6 +1,8 @@
+import type { RevisionBlock } from "@/types/article-diff";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
 function MathBox({
@@ -36,11 +38,13 @@ export default function MathDiff({
   from,
   to,
 }: Props) {
-  const oldValue =
-    String(from?.content ?? "");
+  const oldValue = String(
+    from.content ?? ""
+  );
 
-  const newValue =
-    String(to?.content ?? "");
+  const newValue = String(
+    to?.content ?? ""
+  );
 
   /*
    * Removed math block.
@@ -61,31 +65,11 @@ export default function MathDiff({
   }
 
   /*
-   * Added math block.
-   */
-  if (!from) {
-    return (
-      <div className="space-y-3">
-        <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
-          Added
-        </span>
-
-        <MathBox
-          value={newValue}
-          type="added"
-        />
-      </div>
-    );
-  }
-
-  /*
    * No change.
    */
   if (oldValue === newValue) {
     return (
-      <MathBox
-        value={oldValue}
-      />
+      <MathBox value={oldValue} />
     );
   }
 
