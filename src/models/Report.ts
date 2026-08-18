@@ -65,3 +65,5 @@ const ReportSchema = new Schema(
     timestamps: true,
   }
 );
+
+export default models.Report || mongoose.model("Report", ReportSchema)

@@ -41,7 +41,7 @@ export default function SignUpForm() {
       }
 
       router.push("/login");
-    } catch (error) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

@@ -1,6 +1,8 @@
+import type { RevisionBlock } from "@/types/article-diff";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
 type TableContent = {
@@ -8,7 +10,46 @@ type TableContent = {
   rows?: string[][];
 };
 
-function normalize(value: unknown) {
+function getTableContent(
+  content: unknown
+): TableContent {
+  if (
+    typeof content !== "object" ||
+    content === null
+  ) {
+    return {};
+  }
+
+  const value = content as Record<
+    string,
+    unknown
+  >;
+
+  const headers = Array.isArray(
+    value.headers
+  )
+    ? value.headers.map((header) =>
+        String(header ?? "")
+      )
+    : undefined;
+
+  const rows = Array.isArray(value.rows)
+    ? value.rows.map((row) =>
+        Array.isArray(row)
+          ? row.map((cell) =>
+              String(cell ?? "")
+            )
+          : []
+      )
+    : undefined;
+
+  return {
+    headers,
+    rows,
+  };
+}
+
+function normalize(value: unknown): string {
   return String(value ?? "").trim();
 }
 
@@ -24,12 +65,18 @@ function Cell({
   let className =
     "border border-slate-200 px-3 py-2 text-sm text-slate-700";
 
-  if (changed && type === "removed") {
+  if (
+    changed &&
+    type === "removed"
+  ) {
     className =
       "border border-red-200 bg-red-100 px-3 py-2 text-sm text-red-900 line-through";
   }
 
-  if (changed && type === "added") {
+  if (
+    changed &&
+    type === "added"
+  ) {
     className =
       "border border-green-200 bg-green-100 px-3 py-2 text-sm text-green-900";
   }
@@ -59,35 +106,46 @@ function TablePreview({
         {headers.length > 0 && (
           <thead>
             <tr className="bg-slate-100">
-              {headers.map((header, index) => (
-                <th
-                  key={index}
-                  className="border border-slate-200 px-3 py-2 text-left text-xs font-semibold uppercase text-slate-600"
-                >
-                  {header}
-                </th>
-              ))}
+              {headers.map(
+                (header, index) => (
+                  <th
+                    key={index}
+                    className="border border-slate-200 px-3 py-2 text-left text-xs font-semibold uppercase text-slate-600"
+                  >
+                    {header}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
         )}
 
         <tbody>
-          {rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, columnIndex) => {
-                const key = `${rowIndex}:${columnIndex}`;
+          {rows.map(
+            (row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map(
+                  (
+                    cell,
+                    columnIndex
+                  ) => {
+                    const key = `${rowIndex}:${columnIndex}`;
 
-                return (
-                  <Cell
-                    key={columnIndex}
-                    value={cell}
-                    changed={changedCells?.has(key)}
-                    type={type}
-                  />
-                );
-              })}
-            </tr>
-          ))}
+                    return (
+                      <Cell
+                        key={columnIndex}
+                        value={cell}
+                        changed={changedCells?.has(
+                          key
+                        )}
+                        type={type}
+                      />
+                    );
+                  }
+                )}
+              </tr>
+            )
+          )}
         </tbody>
       </table>
     </div>
@@ -106,9 +164,16 @@ function createChangedCells(
     toRows.length
   );
 
-  for (let row = 0; row < maxRows; row++) {
-    const oldRow = fromRows[row] ?? [];
-    const newRow = toRows[row] ?? [];
+  for (
+    let row = 0;
+    row < maxRows;
+    row++
+  ) {
+    const oldRow =
+      fromRows[row] ?? [];
+
+    const newRow =
+      toRows[row] ?? [];
 
     const maxColumns = Math.max(
       oldRow.length,
@@ -120,20 +185,27 @@ function createChangedCells(
       column < maxColumns;
       column++
     ) {
-      const oldValue = oldRow[column];
-      const newValue = newRow[column];
+      const oldValue =
+        oldRow[column];
+
+      const newValue =
+        newRow[column];
 
       if (
         normalize(oldValue) !==
         normalize(newValue)
       ) {
-        if (oldValue !== undefined) {
+        if (
+          oldValue !== undefined
+        ) {
           oldChanged.add(
             `${row}:${column}`
           );
         }
 
-        if (newValue !== undefined) {
+        if (
+          newValue !== undefined
+        ) {
           newChanged.add(
             `${row}:${column}`
           );
@@ -152,11 +224,14 @@ export default function TableDiff({
   from,
   to,
 }: Props) {
-  const oldContent: TableContent =
-    from?.content ?? {};
+  const oldContent =
+    getTableContent(
+      from.content
+    );
 
-  const newContent: TableContent =
-    to?.content ?? {};
+  const newContent = to
+    ? getTableContent(to.content)
+    : {};
 
   /*
    * Removed table
@@ -171,24 +246,6 @@ export default function TableDiff({
         <TablePreview
           content={oldContent}
           type="removed"
-        />
-      </div>
-    );
-  }
-
-  /*
-   * Added table
-   */
-  if (!from) {
-    return (
-      <div className="space-y-3">
-        <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
-          Added
-        </span>
-
-        <TablePreview
-          content={newContent}
-          type="added"
         />
       </div>
     );
@@ -223,7 +280,8 @@ export default function TableDiff({
     newContent.rows ?? [];
 
   const dimensionsChanged =
-    oldRows.length !== newRows.length ||
+    oldRows.length !==
+      newRows.length ||
     oldRows.some(
       (row, index) =>
         row.length !==

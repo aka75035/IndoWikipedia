@@ -2,10 +2,7 @@ import Category from "@/models/Category";
 import Article from "@/models/Article";
 import ArticleRevision from "@/models/ArticleRevision";
 
-import {
-  CreateCategoryInput,
-  UpdateCategoryInput,
-} from "@/lib/validations/category";
+import { CreateCategoryInput, UpdateCategoryInput, } from "@/lib/validations/category";
 
 import { connectDB } from "../mongodb";
 
@@ -320,4 +317,80 @@ export async function getArticlesByCategory(
         model: Category,
       },
     });
+}
+
+export async function getPopularCategories( limit = 8 ) {
+
+  await connectDB();
+
+
+  const popularCategories = await Article.aggregate([
+      {
+        $match: {
+          status: "published",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "articlerevisions",
+          localField: "currentRevision",
+          foreignField: "_id",
+          as: "revision",
+        },
+      },
+
+      {
+        $unwind: "$revision",
+      },
+
+      {
+        $unwind: "$revision.categories",
+      },
+
+      {
+        $group: {
+          _id: "$revision.categories",
+          articleCount: {
+            $sum: 1,
+          },
+        },
+      },
+
+      {
+        $sort: {
+          articleCount: -1,
+        },
+      },
+
+      {
+        $limit: limit,
+      },
+
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+
+      {
+        $unwind: "$category",
+      },
+
+      {
+        $project: {
+          _id: "$category._id",
+          name: "$category.name",
+          slug: "$category.slug",
+          description:
+            "$category.description",
+          articleCount: 1,
+        },
+      },
+    ]);
+
+  return popularCategories;
 }

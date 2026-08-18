@@ -39,3 +39,5 @@ ArticleTranslationSchema.index(
   { language: 1, slug: 1 },
   { unique: true }
 );
+
+export default models.ArticleTranslation || mongoose.model("ArticleTranslation",ArticleTranslationSchema);

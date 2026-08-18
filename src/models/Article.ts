@@ -29,6 +29,12 @@ const ArticleSchema = new Schema(
       default: "draft",
       index: true,
     },
+    
+    isFeatured: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
 
     currentRevision: {
       type: Schema.Types.ObjectId,

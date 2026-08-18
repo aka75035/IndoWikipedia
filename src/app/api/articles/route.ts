@@ -78,8 +78,7 @@ export async function POST(
 
     // 1. Authentication
     
-    const auth =
-      await requireContributor();
+    const auth = await requireContributor();
 
     if (!auth.user) {
       return NextResponse.json(

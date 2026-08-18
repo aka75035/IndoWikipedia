@@ -63,5 +63,4 @@ const ReferenceSchema = new Schema(
   }
 );
 
-export default models.Reference ||
-  mongoose.model("Reference", ReferenceSchema);
+export default models.Reference || mongoose.model("Reference", ReferenceSchema);

@@ -1,10 +1,13 @@
+import type { RevisionBlock, ImageContent } from "@/types/article-diff";
+import Image from "next/image";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
 type ImageContentProps = {
-  content: any;
+  content: ImageContent;
 };
 
 function ImagePreview({
@@ -19,12 +22,45 @@ function ImagePreview({
   }
 
   return (
-    <img
+    <Image
       src={content.url}
       alt={content.alt ?? ""}
+      width={1200}
+      height={800}
       className="max-h-64 w-full rounded-lg border object-contain"
     />
   );
+}
+
+function getImageContent(
+  content: unknown
+): ImageContent {
+  if (
+    typeof content !== "object" ||
+    content === null
+  ) {
+    return {};
+  }
+
+  const value = content as Record<
+    string,
+    unknown
+  >;
+
+  return {
+    url:
+      typeof value.url === "string"
+        ? value.url
+        : undefined,
+    caption:
+      typeof value.caption === "string"
+        ? value.caption
+        : undefined,
+    alt:
+      typeof value.alt === "string"
+        ? value.alt
+        : undefined,
+  };
 }
 
 function Property({
@@ -67,7 +103,7 @@ export default function ImageDiff({
   from,
   to,
 }: Props) {
-  const oldContent = from?.content ?? {};
+  const oldContent = getImageContent(from.content);
 
   // Added or removed image
   if (!to) {
@@ -104,22 +140,15 @@ export default function ImageDiff({
     );
   }
 
-  const newContent = to.content ?? {};
+  const newContent = getImageContent(to.content);
 
-  const urlChanged =
-    oldContent.url !== newContent.url;
+  const urlChanged = oldContent.url !== newContent.url;
 
-  const captionChanged =
-    oldContent.caption !==
-    newContent.caption;
+  const captionChanged = oldContent.caption !== newContent.caption;
 
-  const altChanged =
-    oldContent.alt !== newContent.alt;
+  const altChanged = oldContent.alt !== newContent.alt;
 
-  const hasChanges =
-    urlChanged ||
-    captionChanged ||
-    altChanged;
+  const hasChanges = urlChanged || captionChanged || altChanged;
 
   if (!hasChanges) {
     return (

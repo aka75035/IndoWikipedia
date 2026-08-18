@@ -1,7 +1,9 @@
 import ChangeBadge from "./ChangeBadge";
 
+import type { ArticleReference } from "@/types/article-diff";
+
 type Props = {
-  reference: any;
+  reference: ArticleReference;
   type: "added" | "removed";
 };
 
@@ -35,14 +37,16 @@ export default function ReferenceCard({
         </p>
       )}
 
-      <a
-        href={reference.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-2 block break-all text-sm text-blue-600 hover:underline"
-      >
-        {reference.url}
-      </a>
+      {reference.url && (
+        <a
+          href={reference.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 block break-all text-sm text-blue-600 hover:underline"
+        >
+          {reference.url}
+        </a>
+      )}
 
       {reference.description && (
         <p className="mt-2 text-sm text-slate-600">

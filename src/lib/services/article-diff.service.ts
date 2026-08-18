@@ -1,26 +1,93 @@
-type AnyObject = Record<string, any>;
+import type {
+  RevisionBlock,
+  BlockChange,
+  BlockChanges,
+  Section,
+  SectionChange,
+  SectionChanges,
+  InfoboxData,
+  InfoboxChanges,
+  InfoboxField,
+  InfoboxFieldChange,
+  ReferenceChanges,
+  ArticleReference,
+  ReferenceChange,
+  SimpleArrayChanges,
+  RevisionComparison,
+} from "@/types/article-diff";
 
-type BlockChange = {
-  order: number;
-  from: AnyObject;
-  to: AnyObject;
+export type AnyObject = Record<string, unknown>;
+
+type MongooseLikeObject = {
+  toObject(options?: {
+    depopulate?: boolean;
+  }): Record<string, unknown>;
 };
 
-type SectionChange = {
-  title: string;
-  from: AnyObject;
-  to: AnyObject;
-  blocks: {
-    added: AnyObject[];
-    removed: AnyObject[];
-    modified: BlockChange[];
-  };
-};
+/**
+ * Check whether a value is a plain object.
+ */
+function isObject(
+  value: unknown
+): value is AnyObject {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+/**
+ * Convert an unknown value into an object.
+ */
+function asObject(
+  value: unknown
+): AnyObject {
+  return isObject(value) ? value : {};
+}
+
+/**
+ * Check whether an object is a Mongoose document
+ * or subdocument with toObject().
+ */
+function isMongooseObject(
+  value: object
+): value is MongooseLikeObject {
+  return (
+    "toObject" in value &&
+    typeof value.toObject === "function"
+  );
+}
+
+/**
+ * Safely get a string value.
+ */
+function getString(
+  value: unknown
+): string {
+  return typeof value === "string"
+    ? value
+    : String(value ?? "");
+}
+
+/**
+ * Safely get a number.
+ */
+function getNumber(
+  value: unknown,
+  fallback: number
+): number {
+  return typeof value === "number"
+    ? value
+    : fallback;
+}
 
 /**
  * Normalize text for comparison.
  */
-function normalizeText(value: unknown): string {
+function normalizeText(
+  value: unknown
+): string {
   return String(value ?? "")
     .trim()
     .replace(/\s+/g, " ")
@@ -30,7 +97,9 @@ function normalizeText(value: unknown): string {
 /**
  * Normalize any value for comparison.
  */
-function normalizeValue(value: unknown): string {
+function normalizeValue(
+  value: unknown
+): string {
   if (
     value === null ||
     value === undefined
@@ -50,21 +119,178 @@ function normalizeValue(value: unknown): string {
 }
 
 /**
+ * Normalize a block into the application's
+ * RevisionBlock type.
+ */
+function normalizeRevisionBlock(
+  value: unknown
+): RevisionBlock {
+  if (
+    typeof value !== "object" ||
+    value === null
+  ) {
+    return {
+      type: "paragraph",
+      content: "",
+    };
+  }
+
+  const object =
+    value as Record<string, unknown>;
+
+  const validTypes = [
+    "paragraph",
+    "heading",
+    "quote",
+    "image",
+    "video",
+    "link",
+    "code",
+    "table",
+    "list",
+    "ordered-list",
+    "math",
+  ] as const;
+
+  const type =
+    typeof object.type === "string" &&
+    validTypes.includes(
+      object.type as (typeof validTypes)[number]
+    )
+      ? (object.type as (typeof validTypes)[number])
+      : "paragraph";
+
+  return {
+    _id:
+      typeof object._id === "string"
+        ? object._id
+        : undefined,
+
+    type,
+
+    content:
+      object.content ?? "",
+
+    order:
+      typeof object.order === "number"
+        ? object.order
+        : undefined,
+  };
+}
+
+/**
+ * Normalize a section.
+ */
+function normalizeSection(
+  value: unknown
+): Section {
+  if (
+    typeof value !== "object" ||
+    value === null
+  ) {
+    return {
+      title: "",
+      blocks: [],
+    };
+  }
+
+  const object =
+    value as Record<string, unknown>;
+
+  return {
+    ...object,
+
+    title:
+      typeof object.title === "string"
+        ? object.title
+        : "",
+
+    level:
+      typeof object.level === "number"
+        ? object.level
+        : undefined,
+
+    order:
+      typeof object.order === "number"
+        ? object.order
+        : undefined,
+
+    blocks: Array.isArray(object.blocks)
+      ? object.blocks.map(
+          normalizeRevisionBlock
+        )
+      : [],
+  };
+}
+
+/**
+ * Normalize an infobox.
+ */
+function normalizeInfobox(
+  value: unknown
+): InfoboxData {
+  if (
+    typeof value !== "object" ||
+    value === null
+  ) {
+    return {
+      fields: [],
+    };
+  }
+
+  const object =
+    value as Record<string, unknown>;
+
+  const fields: InfoboxField[] =
+    Array.isArray(object.fields)
+      ? object.fields.map((field) => {
+          if (
+            typeof field !== "object" ||
+            field === null
+          ) {
+            return {
+              value: field,
+            };
+          }
+
+          const item =
+            field as Record<string, unknown>;
+
+          return {
+            _id:
+              typeof item._id === "string"
+                ? item._id
+                : undefined,
+
+            label:
+              typeof item.label === "string"
+                ? item.label
+                : undefined,
+
+            value: item.value,
+
+            order:
+              typeof item.order === "number"
+                ? item.order
+                : undefined,
+          };
+        })
+      : [];
+
+  return {
+    ...object,
+    fields,
+  };
+}
+
+/**
  * Remove MongoDB-specific identifiers before
  * comparing content.
  */
 function cleanObject(
-  value: any,
+  value: unknown,
   seen?: WeakSet<object>
-): any {
-  /*
-   * Array.map(cleanObject) passes:
-   *
-   * cleanObject(value, index, array)
-   *
-   * Therefore the second argument may NOT
-   * be a WeakSet.
-   */
+): unknown {
   if (!(seen instanceof WeakSet)) {
     seen = new WeakSet<object>();
   }
@@ -86,9 +312,7 @@ function cleanObject(
    * Convert Mongoose documents/subdocuments
    * into plain objects.
    */
-  if (
-    typeof value.toObject === "function"
-  ) {
+  if (isMongooseObject(value)) {
     value = value.toObject({
       depopulate: true,
     });
@@ -111,7 +335,7 @@ function cleanObject(
   seen.add(value);
 
   /*
-   * Arrays
+   * Arrays.
    */
   if (Array.isArray(value)) {
     return value.map((item) =>
@@ -120,15 +344,18 @@ function cleanObject(
   }
 
   /*
-   * Dates
+   * Dates.
    */
   if (value instanceof Date) {
     return value.toISOString();
   }
 
+  const objectValue =
+    value as Record<string, unknown>;
+
   const result: AnyObject = {};
 
-  for (const key of Object.keys(value)) {
+  for (const key of Object.keys(objectValue)) {
     if (
       key === "_id" ||
       key === "__v" ||
@@ -141,13 +368,14 @@ function cleanObject(
     }
 
     result[key] = cleanObject(
-      value[key],
+      objectValue[key],
       seen
     );
   }
 
   return result;
 }
+
 
 /**
  * Compare two objects while ignoring
@@ -158,60 +386,68 @@ function objectsEqual(
   to: AnyObject
 ): boolean {
   return (
-    JSON.stringify(cleanObject(from)) ===
-    JSON.stringify(cleanObject(to))
+    JSON.stringify(
+      cleanObject(from)
+    ) ===
+    JSON.stringify(
+      cleanObject(to)
+    )
   );
 }
 
 /**
- * Get a stable signature for blocks that can
- * safely be identified by their structure.
- *
- * Text blocks are intentionally excluded because
- * their content may change while remaining the
- * same logical block.
+ * Get a stable signature for blocks.
  */
 function blockSignature(
   block: AnyObject
 ): string | null {
-  if (!block) {
-    return null;
-  }
-
   const type = block.type;
-  const content = block.content;
+
+  const content = asObject(
+    block.content
+  );
 
   switch (type) {
     case "image":
       return [
         type,
-        normalizeValue(content?.caption),
-        normalizeValue(content?.alt),
+        normalizeValue(
+          content.caption
+        ),
+        normalizeValue(
+          content.alt
+        ),
       ].join("|");
 
     case "video":
       return [
         type,
-        normalizeValue(content?.caption),
+        normalizeValue(
+          content.caption
+        ),
       ].join("|");
 
     case "link":
       return [
         type,
-        normalizeValue(content?.text),
+        normalizeValue(
+          content.text
+        ),
       ].join("|");
 
     case "code":
       return [
         type,
-        normalizeValue(content?.language),
+        normalizeValue(
+          content.language
+        ),
       ].join("|");
 
     case "table":
       return [
         type,
         normalizeValue(
-          content?.headers
+          content.headers
         ),
       ].join("|");
 
@@ -219,7 +455,9 @@ function blockSignature(
     case "ordered-list":
       return [
         type,
-        normalizeValue(content),
+        normalizeValue(
+          block.content
+        ),
       ].join("|");
 
     default:
@@ -235,8 +473,8 @@ function blockSimilarity(
   to: AnyObject
 ): number {
   if (
-    !from ||
-    !to ||
+    from.type === undefined ||
+    to.type === undefined ||
     from.type !== to.type
   ) {
     return 0;
@@ -244,8 +482,11 @@ function blockSimilarity(
 
   const type = from.type;
 
-  const oldContent = from.content;
-  const newContent = to.content;
+  const oldContent =
+    from.content;
+
+  const newContent =
+    to.content;
 
   if (
     oldContent === undefined ||
@@ -261,33 +502,47 @@ function blockSimilarity(
     return 1;
   }
 
-  /**
-   * Images
+  /*
+   * Images.
    */
   if (type === "image") {
+    const oldImage =
+      asObject(oldContent);
+
+    const newImage =
+      asObject(newContent);
+
     let score = 0;
 
     if (
       normalizeValue(
-        oldContent.caption
+        oldImage.caption
       ) ===
       normalizeValue(
-        newContent.caption
+        newImage.caption
       )
     ) {
       score += 0.3;
     }
 
     if (
-      normalizeValue(oldContent.alt) ===
-      normalizeValue(newContent.alt)
+      normalizeValue(
+        oldImage.alt
+      ) ===
+      normalizeValue(
+        newImage.alt
+      )
     ) {
       score += 0.3;
     }
 
     if (
-      normalizeValue(oldContent.url) ===
-      normalizeValue(newContent.url)
+      normalizeValue(
+        oldImage.url
+      ) ===
+      normalizeValue(
+        newImage.url
+      )
     ) {
       score += 0.4;
     }
@@ -295,26 +550,36 @@ function blockSimilarity(
     return score;
   }
 
-  /**
-   * Videos
+  /*
+   * Videos.
    */
   if (type === "video") {
+    const oldVideo =
+      asObject(oldContent);
+
+    const newVideo =
+      asObject(newContent);
+
     let score = 0;
 
     if (
       normalizeValue(
-        oldContent.caption
+        oldVideo.caption
       ) ===
       normalizeValue(
-        newContent.caption
+        newVideo.caption
       )
     ) {
       score += 0.4;
     }
 
     if (
-      normalizeValue(oldContent.url) ===
-      normalizeValue(newContent.url)
+      normalizeValue(
+        oldVideo.url
+      ) ===
+      normalizeValue(
+        newVideo.url
+      )
     ) {
       score += 0.6;
     }
@@ -322,22 +587,36 @@ function blockSimilarity(
     return score;
   }
 
-  /**
-   * Links
+  /*
+   * Links.
    */
   if (type === "link") {
+    const oldLink =
+      asObject(oldContent);
+
+    const newLink =
+      asObject(newContent);
+
     let score = 0;
 
     if (
-      normalizeValue(oldContent.text) ===
-      normalizeValue(newContent.text)
+      normalizeValue(
+        oldLink.text
+      ) ===
+      normalizeValue(
+        newLink.text
+      )
     ) {
       score += 0.4;
     }
 
     if (
-      normalizeValue(oldContent.url) ===
-      normalizeValue(newContent.url)
+      normalizeValue(
+        oldLink.url
+      ) ===
+      normalizeValue(
+        newLink.url
+      )
     ) {
       score += 0.6;
     }
@@ -345,26 +624,36 @@ function blockSimilarity(
     return score;
   }
 
-  /**
-   * Code
+  /*
+   * Code.
    */
   if (type === "code") {
+    const oldCode =
+      asObject(oldContent);
+
+    const newCode =
+      asObject(newContent);
+
     let score = 0;
 
     if (
       normalizeValue(
-        oldContent.language
+        oldCode.language
       ) ===
       normalizeValue(
-        newContent.language
+        newCode.language
       )
     ) {
       score += 0.3;
     }
 
     if (
-      normalizeValue(oldContent.code) ===
-      normalizeValue(newContent.code)
+      normalizeValue(
+        oldCode.code
+      ) ===
+      normalizeValue(
+        newCode.code
+      )
     ) {
       score += 0.7;
     }
@@ -372,26 +661,36 @@ function blockSimilarity(
     return score;
   }
 
-  /**
-   * Tables
+  /*
+   * Tables.
    */
   if (type === "table") {
+    const oldTable =
+      asObject(oldContent);
+
+    const newTable =
+      asObject(newContent);
+
     let score = 0;
 
     if (
       normalizeValue(
-        oldContent.headers
+        oldTable.headers
       ) ===
       normalizeValue(
-        newContent.headers
+        newTable.headers
       )
     ) {
       score += 0.4;
     }
 
     if (
-      normalizeValue(oldContent.rows) ===
-      normalizeValue(newContent.rows)
+      normalizeValue(
+        oldTable.rows
+      ) ===
+      normalizeValue(
+        newTable.rows
+      )
     ) {
       score += 0.6;
     }
@@ -399,22 +698,24 @@ function blockSimilarity(
     return score;
   }
 
-  /**
-   * Lists
+  /*
+   * Lists.
    */
   if (
     type === "list" ||
     type === "ordered-list"
   ) {
-    return (
-      normalizeValue(oldContent) ===
-      normalizeValue(newContent)
-        ? 1
-        : 0
-    );
+    return normalizeValue(
+      oldContent
+    ) ===
+      normalizeValue(
+        newContent
+      )
+      ? 1
+      : 0;
   }
 
-  /**
+  /*
    * Text blocks.
    */
   if (
@@ -468,22 +769,22 @@ function blockSimilarity(
 function compareBlocks(
   fromBlocks: AnyObject[] = [],
   toBlocks: AnyObject[] = []
-) {
-  const added: AnyObject[] = [];
-  const removed: AnyObject[] = [];
+): BlockChanges {
+  const added: RevisionBlock[] = [];
+  const removed: RevisionBlock[] = [];
   const modified: BlockChange[] = [];
 
-  const usedFrom = new Set<number>();
-  const usedTo = new Set<number>();
+  const usedFrom =
+    new Set<number>();
 
-  /**
+  const usedTo =
+    new Set<number>();
+
+  /*
    * STEP 1
    *
-   * Match blocks using a stable semantic
-   * signature.
-   *
-   * Text blocks are skipped here because
-   * their content is allowed to change.
+   * Match blocks using stable semantic
+   * signatures.
    */
   for (
     let toIndex = 0;
@@ -507,7 +808,9 @@ function compareBlocks(
       fromIndex < fromBlocks.length;
       fromIndex++
     ) {
-      if (usedFrom.has(fromIndex)) {
+      if (
+        usedFrom.has(fromIndex)
+      ) {
         continue;
       }
 
@@ -542,16 +845,23 @@ function compareBlocks(
       )
     ) {
       modified.push({
-        order:
-          toBlock.order ??
-          toIndex,
-        from: fromBlock,
-        to: toBlock,
+        order: getNumber(
+          toBlock.order,
+          toIndex
+        ),
+        from:
+          normalizeRevisionBlock(
+            fromBlock
+          ),
+        to:
+          normalizeRevisionBlock(
+            toBlock
+          ),
       });
     }
   }
 
-  /**
+  /*
    * STEP 2
    *
    * Match remaining blocks using
@@ -577,7 +887,9 @@ function compareBlocks(
       fromIndex < fromBlocks.length;
       fromIndex++
     ) {
-      if (usedFrom.has(fromIndex)) {
+      if (
+        usedFrom.has(fromIndex)
+      ) {
         continue;
       }
 
@@ -596,9 +908,6 @@ function compareBlocks(
       }
     }
 
-    /**
-     * Conservative threshold.
-     */
     if (
       bestIndex !== -1 &&
       bestScore >= 0.35
@@ -616,17 +925,24 @@ function compareBlocks(
         )
       ) {
         modified.push({
-          order:
-            toBlock.order ??
-            toIndex,
-          from: fromBlock,
-          to: toBlock,
+          order: getNumber(
+            toBlock.order,
+            toIndex
+          ),
+          from:
+            normalizeRevisionBlock(
+              fromBlock
+            ),
+          to:
+            normalizeRevisionBlock(
+              toBlock
+            ),
         });
       }
     }
   }
 
-  /**
+  /*
    * STEP 3
    *
    * Unmatched old blocks are removed.
@@ -636,14 +952,18 @@ function compareBlocks(
     fromIndex < fromBlocks.length;
     fromIndex++
   ) {
-    if (!usedFrom.has(fromIndex)) {
+    if (
+      !usedFrom.has(fromIndex)
+    ) {
       removed.push(
-        fromBlocks[fromIndex]
+        normalizeRevisionBlock(
+          fromBlocks[fromIndex]
+        )
       );
     }
   }
 
-  /**
+  /*
    * STEP 4
    *
    * Unmatched new blocks are added.
@@ -653,9 +973,13 @@ function compareBlocks(
     toIndex < toBlocks.length;
     toIndex++
   ) {
-    if (!usedTo.has(toIndex)) {
+    if (
+      !usedTo.has(toIndex)
+    ) {
       added.push(
-        toBlocks[toIndex]
+        normalizeRevisionBlock(
+          toBlocks[toIndex]
+        )
       );
     }
   }
@@ -674,7 +998,23 @@ function sectionKey(
   section: AnyObject
 ): string {
   return normalizeText(
-    section?.title
+    section.title
+  );
+}
+
+/**
+ * Convert an unknown sections value
+ * into an array of objects.
+ */
+function asObjectArray(
+  value: unknown
+): AnyObject[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    isObject
   );
 }
 
@@ -684,15 +1024,18 @@ function sectionKey(
 function compareSections(
   fromSections: AnyObject[] = [],
   toSections: AnyObject[] = []
-) {
-  const added: AnyObject[] = [];
-  const removed: AnyObject[] = [];
+): SectionChanges {
+  const added: Section[] = [];
+  const removed: Section[] = [];
   const modified: SectionChange[] = [];
 
-  const usedFrom = new Set<number>();
-  const usedTo = new Set<number>();
+  const usedFrom =
+    new Set<number>();
 
-  /**
+  const usedTo =
+    new Set<number>();
+
+  /*
    * Match sections by title.
    */
   for (
@@ -739,8 +1082,12 @@ function compareSections(
 
     const blocks =
       compareBlocks(
-        fromSection.blocks ?? [],
-        toSection.blocks ?? []
+        asObjectArray(
+          fromSection.blocks
+        ),
+        asObjectArray(
+          toSection.blocks
+        )
       );
 
     const sectionChanged =
@@ -754,16 +1101,35 @@ function compareSections(
 
     if (sectionChanged) {
       modified.push({
-        title:
-          toSection.title,
-        from: fromSection,
-        to: toSection,
-        blocks,
+        title: getString(
+          toSection.title
+        ),
+
+        from:
+          normalizeSection(
+            fromSection
+          ),
+
+        to:
+          normalizeSection(
+            toSection
+          ),
+
+        blocks: {
+          added:
+            blocks.added ?? [],
+
+          removed:
+            blocks.removed ?? [],
+
+          modified:
+            blocks.modified ?? [],
+        },
       });
     }
   }
 
-  /**
+  /*
    * Unmatched old sections were removed.
    */
   for (
@@ -773,12 +1139,14 @@ function compareSections(
   ) {
     if (!usedFrom.has(i)) {
       removed.push(
-        fromSections[i]
+        normalizeSection(
+          fromSections[i]
+        )
       );
     }
   }
 
-  /**
+  /*
    * Unmatched new sections were added.
    */
   for (
@@ -788,7 +1156,9 @@ function compareSections(
   ) {
     if (!usedTo.has(i)) {
       added.push(
-        toSections[i]
+        normalizeSection(
+          toSections[i]
+        )
       );
     }
   }
@@ -806,7 +1176,10 @@ function compareSections(
 function compareInfobox(
   from: AnyObject | null,
   to: AnyObject | null
-) {
+): InfoboxChanges {
+  /*
+   * Neither revision has an infobox.
+   */
   if (!from && !to) {
     return {
       changed: false,
@@ -831,74 +1204,119 @@ function compareInfobox(
     };
   }
 
+  /*
+   * Infobox added.
+   */
   if (!from && to) {
     return {
       changed: true,
-      added: cleanObject(to),
-      removed: null,
+      added: normalizeInfobox(to),
     };
   }
 
+  /*
+   * Infobox removed.
+   */
   if (from && !to) {
     return {
       changed: true,
-      added: null,
-      removed: cleanObject(from),
+      removed: normalizeInfobox(from),
     };
   }
-    if (!from || !to) {
-    throw new Error("Invalid infobox comparison state");
+
+  /*
+   * At this point both values exist.
+   */
+  if (!from || !to) {
+    throw new Error(
+      "Invalid infobox comparison state"
+    );
   }
 
-  const oldFields: AnyObject[] = from.fields ?? [];
+  const oldFields =
+    asObjectArray(
+      from.fields
+    );
 
-  const newFields: AnyObject[] =
-    to.fields ?? [];
+  const newFields =
+    asObjectArray(
+      to.fields
+    );
 
-  const oldMap = new Map(
-    oldFields.map((field) => [
-      normalizeText(field.label),
-      field,
-    ])
-  );
+  const oldMap =
+    new Map<string, AnyObject>();
 
-  const newMap = new Map(
-    newFields.map((field) => [
-      normalizeText(field.label),
-      field,
-    ])
-  );
+  for (const field of oldFields) {
+    oldMap.set(
+      normalizeText(
+        field.label
+      ),
+      field
+    );
+  }
 
-  const added: AnyObject[] = [];
-  const removed: AnyObject[] = [];
-  const modified: AnyObject[] = [];
+  const newMap =
+    new Map<string, AnyObject>();
 
-  /**
+  for (const field of newFields) {
+    newMap.set(
+      normalizeText(
+        field.label
+      ),
+      field
+    );
+  }
+
+  const added: InfoboxField[] = [];
+  const removed: InfoboxField[] = [];
+  const modified: InfoboxFieldChange[] = [];
+
+  /*
    * Added fields.
    */
-  for (const [key, field] of newMap) {
+  for (
+    const [key, field] of newMap
+  ) {
     if (!oldMap.has(key)) {
-      added.push(
-        cleanObject(field)
-      );
+      const normalized =
+        normalizeInfobox({
+          fields: [field],
+        });
+
+      if (normalized.fields[0]) {
+        added.push(
+          normalized.fields[0]
+        );
+      }
     }
   }
 
-  /**
+  /*
    * Removed fields.
    */
-  for (const [key, field] of oldMap) {
+  for (
+    const [key, field] of oldMap
+  ) {
     if (!newMap.has(key)) {
-      removed.push(
-        cleanObject(field)
-      );
+      const normalized =
+        normalizeInfobox({
+          fields: [field],
+        });
+
+      if (normalized.fields[0]) {
+        removed.push(
+          normalized.fields[0]
+        );
+      }
     }
   }
 
-  /**
+  /*
    * Modified fields.
    */
-  for (const [key, oldField] of oldMap) {
+  for (
+    const [key, oldField] of oldMap
+  ) {
     const newField =
       newMap.get(key);
 
@@ -914,14 +1332,27 @@ function compareInfobox(
       oldField.order !==
         newField.order
     ) {
-      modified.push({
-        from: cleanObject(
-          oldField
-        ),
-        to: cleanObject(
-          newField
-        ),
-      });
+      const oldNormalized =
+        normalizeInfobox({
+          fields: [oldField],
+        });
+
+      const newNormalized =
+        normalizeInfobox({
+          fields: [newField],
+        });
+
+      if (
+        oldNormalized.fields[0] &&
+        newNormalized.fields[0]
+      ) {
+        modified.push({
+          from:
+            oldNormalized.fields[0],
+          to:
+            newNormalized.fields[0],
+        });
+      }
     }
   }
 
@@ -962,6 +1393,51 @@ function compareInfobox(
 }
 
 /**
+ * Normalize a reference.
+ */
+function normalizeReference(
+  value: unknown
+): ArticleReference {
+  const object =
+    asObject(value);
+
+  return {
+    _id:
+      typeof object._id === "string"
+        ? object._id
+        : undefined,
+
+    title:
+      typeof object.title === "string"
+        ? object.title
+        : undefined,
+
+    url:
+      typeof object.url === "string"
+        ? object.url
+        : undefined,
+
+    publisher:
+      typeof object.publisher === "string"
+        ? object.publisher
+        : undefined,
+
+    accessedAt:
+      typeof object.accessedAt ===
+        "string" ||
+      object.accessedAt instanceof Date
+        ? object.accessedAt
+        : undefined,
+
+    description:
+      typeof object.description ===
+      "string"
+        ? object.description
+        : undefined,
+  };
+}
+
+/**
  * Compare references.
  *
  * References are matched by URL first,
@@ -970,19 +1446,24 @@ function compareInfobox(
 function compareReferences(
   from: AnyObject[] = [],
   to: AnyObject[] = []
-) {
-  const oldReferences = from.map((value) => cleanObject(value));
+): ReferenceChanges {
+  const oldReferences =
+    from.map(normalizeReference);
 
-  const newReferences = to.map((value) => cleanObject(value));
+  const newReferences =
+    to.map(normalizeReference);
 
-  const usedOld = new Set<number>();
-  const usedNew = new Set<number>();
+  const usedOld =
+    new Set<number>();
 
-  const added: AnyObject[] = [];
-  const removed: AnyObject[] = [];
-  const modified: AnyObject[] = [];
+  const usedNew =
+    new Set<number>();
 
-  /**
+  const added: ArticleReference[] = [];
+  const removed: ArticleReference[] = [];
+  const modified: ReferenceChange[] = [];
+
+  /*
    * STEP 1
    *
    * Match by URL.
@@ -1028,18 +1509,19 @@ function compareReferences(
 
     if (
       !objectsEqual(
-        oldReferences[oldIndex],
-        newReference
+        oldReferences[oldIndex] as AnyObject,
+        newReference as AnyObject
       )
     ) {
       modified.push({
-        from: oldReferences[oldIndex],
+        from:
+          oldReferences[oldIndex],
         to: newReference,
       });
     }
   }
 
-  /**
+  /*
    * STEP 2
    *
    * Match remaining references by title.
@@ -1089,18 +1571,19 @@ function compareReferences(
 
     if (
       !objectsEqual(
-        oldReferences[oldIndex],
-        newReference
+        oldReferences[oldIndex] as AnyObject,
+        newReference as AnyObject
       )
     ) {
       modified.push({
-        from: oldReferences[oldIndex],
+        from:
+          oldReferences[oldIndex],
         to: newReference,
       });
     }
   }
 
-  /**
+  /*
    * STEP 3
    *
    * Remaining old references were removed.
@@ -1117,7 +1600,7 @@ function compareReferences(
     }
   }
 
-  /**
+  /*
    * STEP 4
    *
    * Remaining new references were added.
@@ -1143,26 +1626,31 @@ function compareReferences(
 
 /**
  * Compare simple arrays.
- *
- * Unlike the previous implementation, this
- * does not compare items by their array index.
- * Each item is matched and consumed once.
  */
 function compareSimpleArrays(
-  from: any[] = [],
-  to: any[] = []
-) {
-  const oldValues = from.map((value) => cleanObject(value));
+  from: unknown[] = [],
+  to: unknown[] = []
+): SimpleArrayChanges {
+  const oldValues =
+    from.map((value) =>
+      cleanObject(value)
+    );
 
-  const newValues = to.map((value) => cleanObject(value));
+  const newValues =
+    to.map((value) =>
+      cleanObject(value)
+    );
 
-  const usedOld = new Set<number>();
-  const usedNew = new Set<number>();
+  const usedOld =
+    new Set<number>();
 
-  const added: any[] = [];
-  const removed: any[] = [];
+  const usedNew =
+    new Set<number>();
 
-  /**
+  const added: unknown[] = [];
+  const removed: unknown[] = [];
+
+  /*
    * Match equal values.
    */
   for (
@@ -1210,7 +1698,7 @@ function compareSimpleArrays(
     }
   }
 
-  /**
+  /*
    * Remaining new values were added.
    */
   for (
@@ -1225,7 +1713,7 @@ function compareSimpleArrays(
     }
   }
 
-  /**
+  /*
    * Remaining old values were removed.
    */
   for (
@@ -1243,16 +1731,21 @@ function compareSimpleArrays(
   return {
     added,
     removed,
+    modified: [],
   };
 }
 
 /**
  * Main revision comparison.
+ *
+ * Explicit RevisionComparison return type is
+ * important because it forces this service to
+ * produce exactly the types consumed by the UI.
  */
 export function compareRevisionData(
   fromRevision: AnyObject,
   toRevision: AnyObject
-) {
+): RevisionComparison {
   const titleChanged =
     fromRevision.title !==
     toRevision.title;
@@ -1275,28 +1768,65 @@ export function compareRevisionData(
     },
 
     infobox: compareInfobox(
-      fromRevision.infobox ?? null,
-      toRevision.infobox ?? null
+      isObject(
+        fromRevision.infobox
+      )
+        ? fromRevision.infobox
+        : null,
+
+      isObject(
+        toRevision.infobox
+      )
+        ? toRevision.infobox
+        : null
     ),
 
     sections: compareSections(
-      fromRevision.sections ?? [],
-      toRevision.sections ?? []
+      asObjectArray(
+        fromRevision.sections
+      ),
+      asObjectArray(
+        toRevision.sections
+      )
     ),
 
     references: compareReferences(
-      fromRevision.references ?? [],
-      toRevision.references ?? []
+      asObjectArray(
+        fromRevision.references
+      ),
+      asObjectArray(
+        toRevision.references
+      )
     ),
 
-    categories: compareSimpleArrays(
-      fromRevision.categories ?? [],
-      toRevision.categories ?? []
-    ),
+    categories:
+      compareSimpleArrays(
+        Array.isArray(
+          fromRevision.categories
+        )
+          ? fromRevision.categories
+          : [],
 
-    media: compareSimpleArrays(
-      fromRevision.media ?? [],
-      toRevision.media ?? []
-    ),
+        Array.isArray(
+          toRevision.categories
+        )
+          ? toRevision.categories
+          : []
+      ),
+
+    media:
+      compareSimpleArrays(
+        Array.isArray(
+          fromRevision.media
+        )
+          ? fromRevision.media
+          : [],
+
+        Array.isArray(
+          toRevision.media
+        )
+          ? toRevision.media
+          : []
+      ),
   };
 }

@@ -37,9 +37,9 @@ export default function Login() {
         return;
       }
 
-      router.push("/admin");
+      router.push("/dashboard");
       router.refresh();
-    } catch (error) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

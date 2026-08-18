@@ -1,6 +1,8 @@
+import type { RevisionBlock } from "@/types/article-diff";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
 type ItemStatus =
@@ -8,8 +10,20 @@ type ItemStatus =
   | "added"
   | "removed";
 
-function normalize(value: unknown) {
+function normalize(value: unknown): string {
   return String(value ?? "").trim();
+}
+
+function getListItems(
+  content: unknown
+): string[] {
+  if (!Array.isArray(content)) {
+    return [];
+  }
+
+  return content.map((item) =>
+    String(item ?? "")
+  );
 }
 
 function compareItems(
@@ -104,18 +118,16 @@ export default function ListDiff({
   from,
   to,
 }: Props) {
-  const oldItems: string[] =
-    Array.isArray(from?.content)
-      ? from.content
-      : [];
+  const oldItems = getListItems(
+    from.content
+  );
 
-  const newItems: string[] =
-    Array.isArray(to?.content)
-      ? to.content
-      : [];
+  const newItems = to
+    ? getListItems(to.content)
+    : [];
 
   const ordered =
-    from?.type === "ordered-list" ||
+    from.type === "ordered-list" ||
     to?.type === "ordered-list";
 
   /*
@@ -132,25 +144,6 @@ export default function ListDiff({
           oldItems,
           ordered,
           "removed"
-        )}
-      </div>
-    );
-  }
-
-  /*
-   * Added list.
-   */
-  if (!from) {
-    return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-        <p className="mb-3 text-xs font-semibold uppercase text-green-700">
-          Added list
-        </p>
-
-        {renderList(
-          newItems,
-          ordered,
-          "added"
         )}
       </div>
     );

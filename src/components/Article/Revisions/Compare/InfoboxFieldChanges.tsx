@@ -1,10 +1,15 @@
 import ChangeBadge from "./ChangeBadge";
 
+import type {
+  InfoboxField,
+  InfoboxFieldChange,
+} from "@/types/article-diff";
+
 type Props = {
   changes?: {
-    added?: any[];
-    removed?: any[];
-    modified?: any[];
+    added?: InfoboxField[];
+    removed?: InfoboxField[];
+    modified?: InfoboxFieldChange[];
   };
 };
 
@@ -17,8 +22,32 @@ export default function InfoboxFieldChanges({
     changes.added?.length ||
     changes.removed?.length ||
     changes.modified?.length;
+  
 
   if (!hasChanges) return null;
+  function displayValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return "—";
+    }
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      typeof value === "bigint"
+    ) {
+      return String(value);
+    }
+
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
 
   return (
     <div>
@@ -42,7 +71,7 @@ export default function InfoboxFieldChanges({
               </span>
 
               <span className="font-medium text-green-700">
-                {field.value}
+                {displayValue(field.value)}
               </span>
             </div>
           </div>
@@ -63,7 +92,7 @@ export default function InfoboxFieldChanges({
               </span>
 
               <span className="font-medium text-red-700 line-through">
-                {field.value}
+                {displayValue(field.value)}
               </span>
             </div>
           </div>
@@ -87,9 +116,9 @@ export default function InfoboxFieldChanges({
 
                   <p className="mt-1 text-sm text-slate-700">
                     <strong>
-                      {field.from.label}
+                      {displayValue(field.from.value)}
                     </strong>
-                    : {field.from.value}
+                    : {displayValue(field.from.value)}
                   </p>
                 </div>
 
@@ -104,9 +133,9 @@ export default function InfoboxFieldChanges({
 
                   <p className="mt-1 text-sm text-slate-700">
                     <strong>
-                      {field.to.label}
+                      {displayValue(field.to.value)}
                     </strong>
-                    : {field.to.value}
+                    : {displayValue(field.to.value)}
                   </p>
                 </div>
               </div>

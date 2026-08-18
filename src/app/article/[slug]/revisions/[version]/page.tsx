@@ -9,6 +9,7 @@ import {
 } from "@/lib/services/article.service";
 
 import { canViewArticle } from "@/lib/services/article-permissions";
+import Image from "next/image";
 
 type Props = {
   params: Promise<{
@@ -16,6 +17,215 @@ type Props = {
     version: string;
   }>;
 };
+
+type RevisionField = {
+  _id?: string;
+  label?: string;
+  value?: unknown;
+};
+
+type RevisionReference = {
+  _id?: string;
+  title?: string;
+  url?: string;
+  publisher?: string;
+  description?: string;
+};
+
+type ImageContent = {
+  url?: string;
+  alt?: string;
+  caption?: string;
+};
+
+type VideoContent = {
+  url?: string;
+  caption?: string;
+};
+
+type LinkContent = {
+  url?: string;
+  text?: string;
+};
+
+type CodeContent = {
+  language?: string;
+  code?: string;
+};
+
+type TableContent = {
+  headers?: string[];
+  rows?: string[][];
+};
+
+type RevisionBlock = {
+  _id?: string;
+  type: string;
+  content: unknown;
+};
+
+type RevisionSection = {
+  _id?: string;
+  title: string;
+  blocks?: RevisionBlock[];
+};
+
+type RevisionMedia = {
+  _id?: string;
+  title?: string;
+  type?: string;
+  url?: string;
+};
+
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null
+  );
+}
+
+function getImageContent(
+  content: unknown
+): ImageContent {
+  if (!isRecord(content)) {
+    return {};
+  }
+
+  return {
+    url:
+      typeof content.url === "string"
+        ? content.url
+        : undefined,
+
+    alt:
+      typeof content.alt === "string"
+        ? content.alt
+        : undefined,
+
+    caption:
+      typeof content.caption === "string"
+        ? content.caption
+        : undefined,
+  };
+}
+
+function getVideoContent(
+  content: unknown
+): VideoContent {
+  if (!isRecord(content)) {
+    return {};
+  }
+
+  return {
+    url:
+      typeof content.url === "string"
+        ? content.url
+        : undefined,
+
+    caption:
+      typeof content.caption === "string"
+        ? content.caption
+        : undefined,
+  };
+}
+
+function getLinkContent(
+  content: unknown
+): LinkContent {
+  if (!isRecord(content)) {
+    return {};
+  }
+
+  return {
+    url:
+      typeof content.url === "string"
+        ? content.url
+        : undefined,
+
+    text:
+      typeof content.text === "string"
+        ? content.text
+        : undefined,
+  };
+}
+
+function getCodeContent(
+  content: unknown
+): CodeContent {
+  if (!isRecord(content)) {
+    return {};
+  }
+
+  return {
+    language:
+      typeof content.language === "string"
+        ? content.language
+        : undefined,
+
+    code:
+      typeof content.code === "string"
+        ? content.code
+        : undefined,
+  };
+}
+
+function getTableContent(
+  content: unknown
+): TableContent {
+  if (!isRecord(content)) {
+    return {};
+  }
+
+  const headers = Array.isArray(
+    content.headers
+  )
+    ? content.headers.filter(
+        (header): header is string =>
+          typeof header === "string"
+      )
+    : [];
+
+  const rows = Array.isArray(
+    content.rows
+  )
+    ? content.rows.map((row) =>
+        Array.isArray(row)
+          ? row.filter(
+              (cell): cell is string =>
+                typeof cell === "string"
+            )
+          : []
+      )
+    : [];
+
+  return {
+    headers,
+    rows,
+  };
+}
+
+function getStringArray(
+  content: unknown
+): string[] {
+  if (!Array.isArray(content)) {
+    return [];
+  }
+
+  return content.filter(
+    (item): item is string =>
+      typeof item === "string"
+  );
+}
+
+function getStringContent(
+  content: unknown
+): string {
+  return typeof content === "string"
+    ? content
+    : String(content ?? "");
+}
 
 export default async function RevisionPage({
   params,
@@ -55,10 +265,27 @@ export default async function RevisionPage({
     notFound();
   }
 
+  const sections =
+    (revision.sections ?? []) as RevisionSection[];
+
+  const references =
+    (revision.references ??
+      []) as RevisionReference[];
+
+  const media =
+    (revision.media ?? []) as RevisionMedia[];
+
+  const infobox = revision.infobox as
+    | {
+        title?: string;
+        image?: string;
+        fields?: RevisionField[];
+      }
+    | undefined;
+
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-slate-500">
           <Link
@@ -87,7 +314,6 @@ export default async function RevisionPage({
         {/* Header */}
         <div className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-
             <div>
               <div className="mb-3 flex items-center gap-3">
                 <span className="rounded-md bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
@@ -95,7 +321,8 @@ export default async function RevisionPage({
                 </span>
 
                 {revision.version ===
-                  article.currentRevision?.version && (
+                  article.currentRevision
+                    ?.version && (
                   <span className="rounded-md bg-green-50 px-3 py-1 text-sm font-medium text-green-700">
                     Current revision
                   </span>
@@ -137,8 +364,10 @@ export default async function RevisionPage({
             <span>
               Edited by{" "}
               <strong className="text-slate-700">
-                {revision.createdBy?.displayName ??
-                  revision.createdBy?.username ??
+                {revision.createdBy
+                  ?.displayName ??
+                  revision.createdBy
+                    ?.username ??
                   "Unknown"}
               </strong>
             </span>
@@ -162,27 +391,31 @@ export default async function RevisionPage({
 
         {/* Content */}
         <div className="space-y-6">
-
           {/* Infobox */}
-          {revision.infobox && (
+          {infobox && (
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-xl font-semibold text-slate-900">
-                {revision.infobox.title}
+                {infobox.title}
               </h2>
 
-              {revision.infobox.image && (
-                <img
-                  src={revision.infobox.image}
-                  alt={revision.infobox.title}
+              {infobox.image && (
+                <Image
+                  src={infobox.image}
+                  alt={infobox.title ?? ""}
+                  width={800}
+                  height={450}
                   className="mb-5 max-h-72 w-full rounded-lg object-cover"
                 />
               )}
 
               <div className="divide-y divide-slate-100">
-                {revision.infobox.fields?.map(
-                  (field: any) => (
+                {infobox.fields?.map(
+                  (field, index) => (
                     <div
-                      key={field._id}
+                      key={
+                        field._id ??
+                        `field-${index}`
+                      }
                       className="grid grid-cols-[140px_1fr] gap-4 py-3 text-sm"
                     >
                       <span className="font-medium text-slate-600">
@@ -190,7 +423,9 @@ export default async function RevisionPage({
                       </span>
 
                       <span className="text-slate-900">
-                        {field.value}
+                        {String(
+                          field.value ?? ""
+                        )}
                       </span>
                     </div>
                   )
@@ -200,10 +435,13 @@ export default async function RevisionPage({
           )}
 
           {/* Sections */}
-          {revision.sections?.map(
-            (section: any) => (
+          {sections.map(
+            (section, sectionIndex) => (
               <section
-                key={section._id}
+                key={
+                  section._id ??
+                  `section-${sectionIndex}`
+                }
                 className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
               >
                 <h2 className="mb-5 border-b border-slate-100 pb-3 text-2xl font-bold text-slate-900">
@@ -212,9 +450,12 @@ export default async function RevisionPage({
 
                 <div className="space-y-5">
                   {section.blocks?.map(
-                    (block: any) => (
+                    (block, blockIndex) => (
                       <RevisionBlock
-                        key={block._id}
+                        key={
+                          block._id ??
+                          `block-${blockIndex}`
+                        }
                         block={block}
                       />
                     )
@@ -225,17 +466,20 @@ export default async function RevisionPage({
           )}
 
           {/* References */}
-          {revision.references?.length > 0 && (
+          {references.length > 0 && (
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="mb-5 text-2xl font-bold text-slate-900">
                 References
               </h2>
 
               <ol className="space-y-4">
-                {revision.references.map(
-                  (reference: any, index: number) => (
+                {references.map(
+                  (reference, index) => (
                     <li
-                      key={reference._id}
+                      key={
+                        reference._id ??
+                        `reference-${index}`
+                      }
                       className="text-sm"
                     >
                       <span className="mr-2 font-semibold text-slate-500">
@@ -253,13 +497,16 @@ export default async function RevisionPage({
 
                       {reference.publisher && (
                         <span className="ml-2 text-slate-500">
-                          — {reference.publisher}
+                          —{" "}
+                          {reference.publisher}
                         </span>
                       )}
 
                       {reference.description && (
                         <p className="mt-1 ml-8 text-slate-500">
-                          {reference.description}
+                          {
+                            reference.description
+                          }
                         </p>
                       )}
                     </li>
@@ -270,33 +517,36 @@ export default async function RevisionPage({
           )}
 
           {/* Media */}
-          {revision.media?.length > 0 && (
+          {media.length > 0 && (
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="mb-5 text-2xl font-bold text-slate-900">
                 Media
               </h2>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                {revision.media.map(
-                  (media: any) => (
+                {media.map(
+                  (item, index) => (
                     <div
-                      key={media._id}
+                      key={
+                        item._id ??
+                        `media-${index}`
+                      }
                       className="rounded-lg border border-slate-200 p-4"
                     >
                       <p className="font-medium text-slate-900">
-                        {media.title ??
-                          media.type ??
+                        {item.title ??
+                          item.type ??
                           "Media"}
                       </p>
 
-                      {media.url && (
+                      {item.url && (
                         <a
-                          href={media.url}
+                          href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-2 block break-all text-sm text-blue-600 hover:underline"
                         >
-                          {media.url}
+                          {item.url}
                         </a>
                       )}
                     </div>
@@ -329,141 +579,164 @@ export default async function RevisionPage({
 }
 
 /**
- * Render revision blocks
+ * Render revision blocks.
  */
 function RevisionBlock({
   block,
 }: {
-  block: any;
+  block: RevisionBlock;
 }) {
   switch (block.type) {
     case "paragraph":
       return (
         <p className="leading-7 text-slate-700">
-          {block.content}
+          {getStringContent(block.content)}
         </p>
       );
 
     case "heading":
       return (
         <h3 className="text-xl font-semibold text-slate-900">
-          {block.content}
+          {getStringContent(block.content)}
         </h3>
       );
 
     case "quote":
       return (
         <blockquote className="border-l-4 border-slate-300 pl-4 italic text-slate-600">
-          {block.content}
+          {getStringContent(block.content)}
         </blockquote>
       );
 
-    case "image":
+    case "image": {
+      const content =
+        getImageContent(block.content);
+
       return (
         <figure>
-          <img
-            src={block.content.url}
+          <Image
+            src={content.url ?? ""}
             alt={
-              block.content.alt ??
-              block.content.caption ??
+              content.alt ??
+              content.caption ??
               ""
             }
+            width={1200}
+            height={800}
             className="max-h-[500px] w-full rounded-lg object-contain"
           />
 
-          {block.content.caption && (
+          {content.caption && (
             <figcaption className="mt-2 text-center text-sm text-slate-500">
-              {block.content.caption}
+              {content.caption}
             </figcaption>
           )}
         </figure>
       );
+    }
 
-    case "video":
+    case "video": {
+      const content =
+        getVideoContent(block.content);
+
       return (
         <figure>
           <video
             controls
             className="w-full rounded-lg"
-            src={block.content.url}
+            src={content.url}
           />
 
-          {block.content.caption && (
+          {content.caption && (
             <figcaption className="mt-2 text-center text-sm text-slate-500">
-              {block.content.caption}
+              {content.caption}
             </figcaption>
           )}
         </figure>
       );
+    }
 
-    case "link":
+    case "link": {
+      const content =
+        getLinkContent(block.content);
+
       return (
         <a
-          href={block.content.url}
+          href={content.url}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:underline"
         >
-          {block.content.text ??
-            block.content.url}
+          {content.text ??
+            content.url ??
+            ""}
         </a>
       );
+    }
 
-    case "list":
+    case "list": {
+      const items = getStringArray(
+        block.content
+      );
+
       return (
         <ul className="list-disc space-y-2 pl-6 text-slate-700">
-          {block.content.map(
-            (item: string, index: number) => (
-              <li key={index}>{item}</li>
-            )
-          )}
+          {items.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
         </ul>
       );
+    }
 
-    case "ordered-list":
-      return (
-        <ol className="list-decimal space-y-2 pl-6 text-slate-700">
-          {block.content.map(
-            (item: string, index: number) => (
-              <li key={index}>{item}</li>
-            )
-          )}
-        </ol>
+    case "ordered-list": {
+      const items = getStringArray(
+        block.content
       );
 
-    case "code":
+      return (
+        <ol className="list-decimal space-y-2 pl-6 text-slate-700">
+          {items.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ol>
+      );
+    }
+
+    case "code": {
+      const content =
+        getCodeContent(block.content);
+
       return (
         <div className="overflow-hidden rounded-lg border border-slate-200">
           <div className="border-b border-slate-200 bg-slate-100 px-4 py-2 text-xs font-medium text-slate-500">
-            {block.content.language}
+            {content.language ?? ""}
           </div>
 
           <pre className="overflow-x-auto bg-slate-950 p-4 text-sm text-slate-100">
-            <code>
-              {block.content.code}
-            </code>
+            <code>{content.code ?? ""}</code>
           </pre>
         </div>
       );
+    }
 
     case "math":
       return (
         <div className="rounded-lg bg-slate-50 p-5 text-center text-xl font-medium">
-          {block.content}
+          {getStringContent(block.content)}
         </div>
       );
 
-    case "table":
+    case "table": {
+      const content =
+        getTableContent(block.content);
+
       return (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse border border-slate-200 text-sm">
             <thead>
               <tr className="bg-slate-50">
-                {block.content.headers.map(
-                  (
-                    header: string,
-                    index: number
-                  ) => (
+                {(content.headers ?? []).map(
+                  (header, index) => (
                     <th
                       key={index}
                       className="border border-slate-200 px-4 py-3 text-left font-semibold"
@@ -476,17 +749,11 @@ function RevisionBlock({
             </thead>
 
             <tbody>
-              {block.content.rows.map(
-                (
-                  row: string[],
-                  rowIndex: number
-                ) => (
+              {(content.rows ?? []).map(
+                (row, rowIndex) => (
                   <tr key={rowIndex}>
                     {row.map(
-                      (
-                        cell: string,
-                        cellIndex: number
-                      ) => (
+                      (cell, cellIndex) => (
                         <td
                           key={cellIndex}
                           className="border border-slate-200 px-4 py-3"
@@ -502,6 +769,7 @@ function RevisionBlock({
           </table>
         </div>
       );
+    }
 
     default:
       return (

@@ -47,3 +47,4 @@ const DiscussionSchema = new Schema(
     timestamps: true,
   }
 );
+export default models.Discussion || mongoose.model("Discussion", DiscussionSchema);

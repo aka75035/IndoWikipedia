@@ -20,7 +20,11 @@ export default async function SearchPage({
     articles: results,
     total,
     totalPages,
-  } = await searchArticles(q ?? "", undefined, currentPage);
+  } = await searchArticles(
+    q ?? "",
+    undefined,
+    currentPage
+  );
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -39,13 +43,17 @@ export default async function SearchPage({
             <p className="mt-2 text-slate-600">
               Results for{" "}
               <span className="font-medium text-slate-900">
-                "{q}"
+                &quot;{q}&quot;
               </span>
             </p>
           )}
 
           <p className="mt-1 text-sm text-slate-500">
-            {total} {total === 1 ? "article" : "articles"} found
+            {total}{" "}
+            {total === 1
+              ? "article"
+              : "articles"}{" "}
+            found
           </p>
         </div>
 
@@ -93,7 +101,8 @@ export default async function SearchPage({
                 )}
 
                 <span className="px-4 py-2 text-sm text-slate-600">
-                  Page {currentPage} of {totalPages}
+                  Page {currentPage} of{" "}
+                  {totalPages}
                 </span>
 
                 {currentPage < totalPages && (

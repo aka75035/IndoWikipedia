@@ -1,17 +1,48 @@
 import TextDiff from "./TextDiff";
 
+import type {
+  LinkContent,
+  RevisionBlock,
+} from "@/types/article-diff";
+
 type Props = {
-  from: any;
-  to?: any;
+  from: RevisionBlock;
+  to?: RevisionBlock;
 };
 
-function LinkContent({
-  block,
-}: {
-  block: any;
-}) {
-  const content = block.content ?? {};
+function getLinkContent(
+  content: unknown
+): LinkContent {
+  if (
+    typeof content !== "object" ||
+    content === null
+  ) {
+    return {};
+  }
 
+  const value = content as Record<
+    string,
+    unknown
+  >;
+
+  return {
+    text:
+      typeof value.text === "string"
+        ? value.text
+        : undefined,
+
+    url:
+      typeof value.url === "string"
+        ? value.url
+        : undefined,
+  };
+}
+
+function LinkContent({
+  content,
+}: {
+  content: LinkContent;
+}) {
   return (
     <div className="space-y-3">
       <div>
@@ -20,7 +51,7 @@ function LinkContent({
         </p>
 
         <p className="text-sm font-medium text-slate-900">
-          {content.text}
+          {content.text ?? "—"}
         </p>
       </div>
 
@@ -29,14 +60,20 @@ function LinkContent({
           URL
         </p>
 
-        <a
-          href={content.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="break-all text-sm text-blue-600 hover:underline"
-        >
-          {content.url}
-        </a>
+        {content.url ? (
+          <a
+            href={content.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="break-all text-sm text-blue-600 hover:underline"
+          >
+            {content.url}
+          </a>
+        ) : (
+          <p className="text-sm text-slate-400">
+            —
+          </p>
+        )}
       </div>
     </div>
   );
@@ -46,12 +83,24 @@ export default function LinkDiff({
   from,
   to,
 }: Props) {
+  const oldContent = getLinkContent(
+    from.content
+  );
+
+  /*
+   * Removed link.
+   */
   if (!to) {
-    return <LinkContent block={from} />;
+    return (
+      <LinkContent
+        content={oldContent}
+      />
+    );
   }
 
-  const oldContent = from.content ?? {};
-  const newContent = to.content ?? {};
+  const newContent = getLinkContent(
+    to.content
+  );
 
   const textChanged =
     oldContent.text !== newContent.text;
@@ -68,8 +117,8 @@ export default function LinkDiff({
           </p>
 
           <TextDiff
-            from={String(oldContent.text ?? "")}
-            to={String(newContent.text ?? "")}
+            from={oldContent.text ?? ""}
+            to={newContent.text ?? ""}
           />
         </div>
       ) : (
@@ -79,7 +128,7 @@ export default function LinkDiff({
           </p>
 
           <p className="text-sm text-slate-700">
-            {oldContent.text}
+            {oldContent.text ?? "—"}
           </p>
         </div>
       )}
@@ -91,8 +140,8 @@ export default function LinkDiff({
           </p>
 
           <TextDiff
-            from={String(oldContent.url ?? "")}
-            to={String(newContent.url ?? "")}
+            from={oldContent.url ?? ""}
+            to={newContent.url ?? ""}
           />
         </div>
       ) : (
@@ -101,14 +150,20 @@ export default function LinkDiff({
             URL
           </p>
 
-          <a
-            href={oldContent.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="break-all text-sm text-blue-600 hover:underline"
-          >
-            {oldContent.url}
-          </a>
+          {oldContent.url ? (
+            <a
+              href={oldContent.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="break-all text-sm text-blue-600 hover:underline"
+            >
+              {oldContent.url}
+            </a>
+          ) : (
+            <p className="text-sm text-slate-400">
+              —
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -1,7 +1,25 @@
+type ArticleForPermission = {
+  status?: string;
+
+  createdBy?: {
+    _id?: {
+      toString(): string;
+    };
+  };
+};
+
+type UserForPermission = {
+  role?: string;
+
+  _id?: {
+    toString(): string;
+  };
+};
+
 export function canViewArticle(
-  article: any,
-  user: any
-) {
+  article: ArticleForPermission,
+  user: UserForPermission | null | undefined
+): boolean {
   // Published articles are public
   if (article.status === "published") {
     return true;
@@ -23,8 +41,8 @@ export function canViewArticle(
   // Contributor can view own article
   if (
     user.role === "contributor" &&
-    article.createdBy?._id.toString() ===
-      user._id.toString()
+    article.createdBy?._id?.toString() ===
+      user._id?.toString()
   ) {
     return true;
   }

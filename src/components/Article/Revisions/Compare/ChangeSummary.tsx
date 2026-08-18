@@ -1,7 +1,13 @@
 import ChangeStat from "./ChangeStat";
 
+import type {
+  RevisionComparison,
+  Section,
+  SectionChange,
+} from "@/types/article-diff";
+
 type Props = {
-  changes: any;
+  changes: RevisionComparison;
 };
 
 export default function ChangeSummary({
@@ -12,14 +18,11 @@ export default function ChangeSummary({
   const categories = changes?.categories;
   const media = changes?.media;
 
-  const titleChanged =
-    changes?.title?.changed ?? false;
+  const titleChanged = changes?.title?.changed ?? false;
 
-  const summaryChanged =
-    changes?.summary?.changed ?? false;
+  const summaryChanged = changes?.summary?.changed ?? false;
 
-  const infoboxChanged =
-    changes?.infobox?.changed ?? false;
+  const infoboxChanged = changes?.infobox?.changed ?? false;
 
   const sectionChanges =
     (sections?.added?.length ?? 0) +
@@ -28,7 +31,7 @@ export default function ChangeSummary({
 
   const blockChanges =
     (sections?.modified ?? []).reduce(
-      (total: number, section: any) =>
+      (total: number, section: SectionChange) =>
         total +
         (section.blocks?.added?.length ?? 0) +
         (section.blocks?.removed?.length ?? 0) +
@@ -36,12 +39,12 @@ export default function ChangeSummary({
       0
     ) +
     (sections?.added ?? []).reduce(
-      (total: number, section: any) =>
+      (total: number, section: Section) =>
         total + (section.blocks?.length ?? 0),
       0
     ) +
     (sections?.removed ?? []).reduce(
-      (total: number, section: any) =>
+      (total: number, section: Section) =>
         total + (section.blocks?.length ?? 0),
       0
     );

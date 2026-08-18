@@ -40,3 +40,5 @@ ArticleContributorSchema.index(
   { article: 1, user: 1 },
   { unique: true }
 );
+
+export default models.ArticleContributor || mongoose.model("ArticleContributor",ArticleContributorSchema);

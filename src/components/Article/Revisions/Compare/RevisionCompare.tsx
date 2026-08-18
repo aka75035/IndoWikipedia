@@ -2,6 +2,7 @@ import ChangeSummary from "./ChangeSummary";
 import InfoboxChanges from "./InfoboxChanges";
 import ReferenceChanges from "./ReferenceChanges";
 import SectionChanges from "./SectionChanges";
+import type { RevisionComparison } from "@/types/article-diff";
 
 type Props = {
   article: {
@@ -10,7 +11,7 @@ type Props = {
   };
   from: number;
   to: number;
-  changes: any;
+  changes: RevisionComparison;
 };
 
 export default function RevisionCompare({

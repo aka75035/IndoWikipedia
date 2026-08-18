@@ -76,5 +76,4 @@ const MediaSchema = new Schema(
   }
 );
 
-export default models.Media ||
-  mongoose.model("Media", MediaSchema);
+export default models.Media || mongoose.model("Media", MediaSchema);
