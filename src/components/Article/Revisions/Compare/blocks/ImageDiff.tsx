@@ -104,8 +104,6 @@ export default function ImageDiff({
   to,
 }: Props) {
   const oldContent = getImageContent(from.content);
-
-  // Added or removed image
   if (!to) {
     return (
       <div>
@@ -164,7 +162,7 @@ export default function ImageDiff({
 
   return (
     <div className="space-y-6">
-      {/* Image previews */}
+      
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <p className="mb-2 text-xs font-semibold uppercase text-red-600">
@@ -187,7 +185,7 @@ export default function ImageDiff({
         </div>
       </div>
 
-      {/* Property changes */}
+      
       <div className="rounded-lg border border-slate-200">
         <Property
           label="URL"

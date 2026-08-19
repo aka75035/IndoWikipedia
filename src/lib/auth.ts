@@ -36,7 +36,9 @@ export async function getCurrentUser() {
     const user =
       await User.findById(
         payload.userId
-      ).select("-passwordHash");
+      ).select(
+        "_id username email displayName avatar bio role status emailVerified createdAt lastLoginAt"
+      );
 
     if (!user) {
       return null;

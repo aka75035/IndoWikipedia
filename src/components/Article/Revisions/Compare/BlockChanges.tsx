@@ -26,7 +26,7 @@ export default function BlockChanges({
   return (
     <div className="space-y-5">
 
-      {/* Added */}
+      
       {added.length > 0 && (
         <div>
           <div className="mb-3 flex items-center gap-2">
@@ -61,7 +61,7 @@ export default function BlockChanges({
         </div>
       )}
 
-      {/* Removed */}
+      
       {removed.length > 0 && (
         <div>
           <div className="mb-3 flex items-center gap-2">
@@ -96,7 +96,7 @@ export default function BlockChanges({
         </div>
       )}
 
-      {/* Modified */}
+      
       {modified.length > 0 && (
         <div>
           <div className="mb-3 flex items-center gap-2">

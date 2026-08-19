@@ -1,12 +1,7 @@
 import Link from "next/link";
 import UserMenu from "./UserMenu";
 
-type AuthUser = {
-  _id: string;
-  username: string;
-  displayName?: string;
-  role: string;
-};
+import { AuthUser } from "@/types/user";
 
 type Props = {
   user: AuthUser | null;

@@ -27,7 +27,7 @@ export default function SectionChanges({
 
       <div className="space-y-6">
 
-        {/* Added sections */}
+        
         {changes.added?.map(
           (section) => (
             <div
@@ -61,7 +61,7 @@ export default function SectionChanges({
           )
         )}
 
-        {/* Removed sections */}
+        
         {changes.removed?.map(
           (section) => (
             <div
@@ -95,7 +95,7 @@ export default function SectionChanges({
           )
         )}
 
-        {/* Modified sections */}
+        
         {changes.modified?.map(
           (section, index) => (
             <div

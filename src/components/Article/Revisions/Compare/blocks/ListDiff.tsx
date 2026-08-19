@@ -37,9 +37,7 @@ function compareItems(
   const usedFrom = new Set<number>();
   const usedTo = new Set<number>();
 
-  /*
-   * Match identical items first.
-   */
+  
   for (let i = 0; i < toItems.length; i++) {
     const toItem = normalize(toItems[i]);
 
@@ -56,18 +54,14 @@ function compareItems(
     }
   }
 
-  /*
-   * Remaining old items were removed.
-   */
+  
   fromItems.forEach((item, index) => {
     if (!usedFrom.has(index)) {
       removed.push(item);
     }
   });
 
-  /*
-   * Remaining new items were added.
-   */
+  
   toItems.forEach((item, index) => {
     if (!usedTo.has(index)) {
       added.push(item);
@@ -130,9 +124,7 @@ export default function ListDiff({
     from.type === "ordered-list" ||
     to?.type === "ordered-list";
 
-  /*
-   * Removed list.
-   */
+  
   if (!to) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4">

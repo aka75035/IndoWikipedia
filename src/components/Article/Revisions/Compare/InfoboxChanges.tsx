@@ -74,18 +74,7 @@ export default function InfoboxChanges({
     );
   }
 
-  /**
-   * Detailed modified format:
-   *
-   * {
-   *   title: {...},
-   *   image: {...},
-   *   fields: {...}
-   * }
-   *
-   * This format already contains
-   * the exact before/after values.
-   */
+  
   return (
     <CollapsibleSection
       title="Infobox"

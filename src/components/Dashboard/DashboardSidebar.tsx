@@ -78,27 +78,27 @@ const roleItems: Record<UserRole, NavItem[]> = {
   editor: [
     {
       label: "Articles",
-      href: "/dashboard/articles",
+      href: "/dashboard/editor/articles",
       icon: FileText,
     },
     {
       label: "Review Queue",
-      href: "/dashboard/review",
+      href: "/dashboard/editor/review",
       icon: ClipboardCheck,
     },
     {
       label: "Featured Articles",
-      href: "/dashboard/featured",
+      href: "/dashboard/editor/featured",
       icon: Star,
     },
     {
       label: "Categories",
-      href: "/dashboard/categories",
+      href: "/dashboard/editor/categories",
       icon: FolderTree,
     },
     {
       label: "Contributors",
-      href: "/dashboard/contributors",
+      href: "/dashboard/editor/contributors",
       icon: Users,
     },
   ],
@@ -106,17 +106,17 @@ const roleItems: Record<UserRole, NavItem[]> = {
   moderator: [
     {
       label: "Reports",
-      href: "/dashboard/reports",
+      href: "/dashboard/moderator/reports",
       icon: Shield,
     },
     {
       label: "Flagged Content",
-      href: "/dashboard/moderation",
+      href: "/dashboard/moderator/moderation",
       icon: Shield,
     },
     {
       label: "Moderation History",
-      href: "/dashboard/moderation/history",
+      href: "/dashboard/moderator/moderation/history",
       icon: History,
     },
   ],
@@ -124,37 +124,37 @@ const roleItems: Record<UserRole, NavItem[]> = {
   admin: [
     {
       label: "Users",
-      href: "/dashboard/users",
+      href: "/dashboard/admin/users",
       icon: Users,
     },
     {
       label: "Articles",
-      href: "/dashboard/articles",
+      href: "/dashboard/admin/articles",
       icon: FileText,
     },
     {
       label: "Review Queue",
-      href: "/dashboard/review",
+      href: "/dashboard/admin/review",
       icon: ClipboardCheck,
     },
     {
       label: "Featured Articles",
-      href: "/dashboard/featured",
+      href: "/dashboard/admin/featured",
       icon: Star,
     },
     {
       label: "Categories",
-      href: "/dashboard/categories",
+      href: "/dashboard/admin/categories",
       icon: FolderTree,
     },
     {
       label: "Moderation",
-      href: "/dashboard/moderation",
+      href: "/dashboard/admin/moderation",
       icon: Shield,
     },
     {
       label: "Settings",
-      href: "/dashboard/settings",
+      href: "/dashboard/admin/settings",
       icon: Settings,
     },
   ],

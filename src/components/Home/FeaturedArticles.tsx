@@ -41,7 +41,7 @@ export default async function FeaturedArticles() {
           {articles.map((article) => (
             <Link
               key={article._id.toString()}
-              href={`/article/${article.slug}`}
+              href={`/articles/${article.slug}`}
               className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
             >
               <div className="flex items-center justify-between">

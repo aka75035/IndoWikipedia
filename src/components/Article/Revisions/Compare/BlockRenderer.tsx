@@ -24,19 +24,14 @@ export default function BlockRenderer({
     return null;
   }
 
-  /**
-   * The block type itself changed.
-   *
-   * Example:
-   * video -> paragraph
-   */
+  
   if (
     compareWith &&
     block.type !== compareWith.type
   ) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Previous block */}
+        
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <p className="mb-3 text-xs font-semibold uppercase text-red-600">
             Previous · {block.type}
@@ -45,7 +40,7 @@ export default function BlockRenderer({
           <BlockRenderer block={block} />
         </div>
 
-        {/* New block */}
+        
         <div className="rounded-lg border border-green-200 bg-green-50 p-4">
           <p className="mb-3 text-xs font-semibold uppercase text-green-600">
             New · {compareWith.type}
@@ -59,12 +54,7 @@ export default function BlockRenderer({
     );
   }
 
-  /**
-   * Same block type.
-   *
-   * Let the specific diff component
-   * compare the old and new content.
-   */
+  
   switch (block.type) {
     case "paragraph":
       return (

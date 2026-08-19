@@ -70,7 +70,7 @@ export default async function RevisionHistoryPage({
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-slate-500">
           <Link
-            href={`/article/${article.slug}`}
+            href={`/articles/${article.slug}`}
             className="hover:text-blue-600 hover:underline"
           >
             {article.title}
@@ -101,7 +101,7 @@ export default async function RevisionHistoryPage({
             </div>
 
             <Link
-              href={`/article/${article.slug}`}
+              href={`/articles/${article.slug}`}
               className="inline-flex w-fit items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
             >
               ← Back to article
@@ -177,7 +177,7 @@ export default async function RevisionHistoryPage({
                   {/* Change */}
                   <div className="min-w-0">
                     <Link
-                      href={`/article/${article.slug}/revisions/${revision.version}`}
+                      href={`/articles/${article.slug}/revisions/${revision.version}`}
                       className="font-semibold text-slate-900 hover:text-blue-600 hover:underline"
                     >
                       {revision.editSummary ||
@@ -213,7 +213,7 @@ export default async function RevisionHistoryPage({
                   {/* Actions */}
                   <div className="flex items-center gap-2 md:justify-end">
                     <Link
-                      href={`/article/${article.slug}/revisions/${revision.version}`}
+                      href={`/articles/${article.slug}/revisions/${revision.version}`}
                       className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                     >
                       View
@@ -221,7 +221,7 @@ export default async function RevisionHistoryPage({
 
                     {revision.version > 1 && (
                       <Link
-                        href={`/article/${article.slug}/compare?from=${
+                        href={`/articles/${article.slug}/compare?from=${
                           revision.version - 1
                         }&to=${revision.version}`}
                         className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
@@ -247,7 +247,7 @@ export default async function RevisionHistoryPage({
             <div className="flex gap-2">
               {result.page > 1 && (
                 <Link
-                  href={`/article/${article.slug}/revisions?page=${
+                  href={`/articles/${article.slug}/revisions?page=${
                     result.page - 1
                   }`}
                   className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -259,7 +259,7 @@ export default async function RevisionHistoryPage({
               {result.page <
                 result.totalPages && (
                 <Link
-                  href={`/article/${article.slug}/revisions?page=${
+                  href={`/articles/${article.slug}/revisions?page=${
                     result.page + 1
                   }`}
                   className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
