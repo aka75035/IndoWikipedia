@@ -40,7 +40,7 @@ export default async function NewsAroundRegion() {
           {articles.map((article) => (
             <Link
               key={article._id.toString()}
-              href={`/article/${article.slug}`}
+              href={`/articles/${article.slug}`}
               className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-blue-200 hover:bg-blue-50/30"
             >
               <div className="flex items-start justify-between gap-4">

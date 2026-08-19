@@ -80,9 +80,7 @@ export default function ReferenceDiff({
   from,
   to,
 }: Props) {
-  /**
-   * Removed reference
-   */
+  
   if (!to) {
     const content = from ?? {};
 
@@ -125,12 +123,7 @@ export default function ReferenceDiff({
     );
   }
 
-  /**
-   * Added reference
-   *
-   * `from` can be undefined when this
-   * component is used for an added item.
-   */
+  
   if (!from) {
     const content = to ?? {};
 
@@ -173,9 +166,7 @@ export default function ReferenceDiff({
     );
   }
 
-  /**
-   * Modified reference
-   */
+  
   const oldContent = from ?? {};
   const newContent = to ?? {};
 

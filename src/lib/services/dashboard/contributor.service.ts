@@ -39,3 +39,24 @@ export async function getContributorStats(
     published,
   };
 }
+
+export async function getContributorArticles(
+  userId: string
+) {
+  await connectDB();
+
+  return Article.find({
+    createdBy: userId,
+  })
+    .sort({
+      updatedAt: -1,
+    })
+    .populate({
+      path: "currentRevision",
+      select: "version title summary",
+    })
+    .select(
+      "title slug status currentRevision updatedAt publishedAt"
+    )
+    .lean();
+}

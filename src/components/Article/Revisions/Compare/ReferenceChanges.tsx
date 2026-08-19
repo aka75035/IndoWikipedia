@@ -43,7 +43,7 @@ export default function ReferenceChanges({
     >
       <div className="space-y-6">
 
-        {/* Added references */}
+        
         {added.length > 0 && (
           <div>
             <h3 className="mb-3 text-sm font-semibold text-green-700">
@@ -69,7 +69,7 @@ export default function ReferenceChanges({
           </div>
         )}
 
-        {/* Removed references */}
+        
         {removed.length > 0 && (
           <div>
             <h3 className="mb-3 text-sm font-semibold text-red-700">
@@ -95,7 +95,7 @@ export default function ReferenceChanges({
           </div>
         )}
 
-        {/* Modified references */}
+        
         {modified.length > 0 && (
           <div>
             <h3 className="mb-3 text-sm font-semibold text-blue-700">

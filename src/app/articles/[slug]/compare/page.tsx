@@ -119,7 +119,7 @@ export default async function ComparePage({
           </p>
 
           <Link
-            href={`/article/${slug}/revisions`}
+            href={`/articles/${slug}/revisions`}
             className="mt-4 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
           >
             Back to revision history
@@ -206,7 +206,7 @@ export default async function ComparePage({
           </p>
 
           <Link
-            href={`/article/${slug}/revisions`}
+            href={`/articles/${slug}/revisions`}
             className="mt-4 inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
           >
             Back to revision history
@@ -231,7 +231,7 @@ export default async function ComparePage({
         {/* Back navigation */}
         <div className="mb-6">
           <Link
-            href={`/article/${slug}/revisions`}
+            href={`/articles/${slug}/revisions`}
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-900"
           >
             ← Revision history

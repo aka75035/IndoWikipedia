@@ -233,9 +233,7 @@ export default function TableDiff({
     ? getTableContent(to.content)
     : {};
 
-  /*
-   * Removed table
-   */
+  
   if (!to) {
     return (
       <div className="space-y-3">
@@ -293,9 +291,7 @@ export default function TableDiff({
     rowsChanged ||
     dimensionsChanged;
 
-  /*
-   * Nothing changed
-   */
+  
   if (!hasChanges) {
     return (
       <TablePreview

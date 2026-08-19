@@ -623,6 +623,47 @@ export async function publishArticle(
     });
 }
 
+/**
+ * Get a single published article by slug
+ *
+ * Used by the public article page.
+ */
+export async function getPublishedArticle(
+  slug: string
+) {
+  await connectDB();
+
+  return Article.findOne({
+    slug: normalizeSlug(slug),
+    status: "published",
+  })
+    .select(
+      "title slug status createdBy currentRevision publishedAt updatedAt"
+    )
+    .populate(
+      "createdBy",
+      "username displayName avatar bio"
+    )
+    .populate({
+      path: "currentRevision",
+      populate: [
+        {
+          path: "createdBy",
+          select:
+            "username displayName avatar",
+          model: User,
+        },
+        {
+          path: "categories",
+          select:
+            "name slug description",
+          model: Category,
+        },
+      ],
+    })
+    .lean();
+}
+
 export async function getPublishedArticles(
   page = 1,
   query = "",
@@ -708,7 +749,7 @@ export async function getPublishedArticles(
   const articles =
     await Article.find(filter)
       .select(
-        "title slug status createdBy currentRevision publishedAt createdAt"
+        "title slug status isFeatured createdBy currentRevision publishedAt createdAt"
       )
       .populate(
         "createdBy",
@@ -725,8 +766,52 @@ export async function getPublishedArticles(
       .limit(ARTICLES_PER_PAGE)
       .lean();
 
+  const serializedArticles =
+    articles.map((article) => ({
+      _id: article._id.toString(),
+
+      title: article.title,
+
+      slug: article.slug,
+
+      status: article.status,
+
+      isFeatured: article.isFeatured,
+
+      publishedAt:
+        article.publishedAt?.toISOString() ??
+        null,
+
+      createdAt:
+        article.createdAt?.toISOString() ??
+        null,
+
+      createdBy: article.createdBy
+        ? {
+            _id: article.createdBy._id.toString(),
+            username:
+              article.createdBy.username,
+            displayName:
+              article.createdBy.displayName,
+            avatar:
+              article.createdBy.avatar ?? null,
+          }
+        : null,
+
+      currentRevision:
+        article.currentRevision
+          ? {
+              _id: article.currentRevision._id.toString(),
+              title:
+                article.currentRevision.title,
+              summary:
+                article.currentRevision.summary,
+            }
+          : null,
+    }));    
+
   return {
-    articles,
+    articles: serializedArticles,
     total,
     page: currentPage,
     totalPages,
@@ -837,6 +922,43 @@ export async function getArticleForEditing(
       "username displayName avatar"
     )
     .lean();
+
+  return article;
+}
+
+export async function requestArticleChanges(
+  slug: string,
+  userId: string,
+  role: string
+) {
+  await connectDB();
+
+  const article = await Article.findOne({
+    slug: normalizeSlug(slug),
+  });
+
+  if (!article) {
+    throw new Error("Article not found");
+  }
+
+  if (
+    role !== "editor" &&
+    role !== "admin"
+  ) {
+    throw new Error(
+      "You are not allowed to request changes"
+    );
+  }
+
+  if (article.status !== "review") {
+    throw new Error(
+      `Article cannot be sent back from "${article.status}" status`
+    );
+  }
+
+  article.status = "draft";
+
+  await article.save();
 
   return article;
 }

@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import NavLogo from "./NavLogo";
 import NavLinks from "./NavLinks";
 import SearchBar from "./SearchBar";
-import ThemeToggle from "./ThemeToggle";
 import { MenuIcon } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import AuthNav from "./AuthNav";
@@ -45,8 +44,6 @@ export default function Navbar({user}:NavbarProps) {
         )}
           <div className="flex items-center gap-2">
             <AuthNav user={user} />
-
-            <ThemeToggle />
 
             <button
               type="button"

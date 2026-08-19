@@ -87,9 +87,7 @@ export default function LinkDiff({
     from.content
   );
 
-  /*
-   * Removed link.
-   */
+  
   if (!to) {
     return (
       <LinkContent

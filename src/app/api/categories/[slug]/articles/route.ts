@@ -17,8 +17,7 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const articles =
-      await getArticlesByCategory(slug);
+    const articles = await getArticlesByCategory(slug);
 
     return NextResponse.json(
       {

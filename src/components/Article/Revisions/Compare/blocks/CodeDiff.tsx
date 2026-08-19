@@ -90,9 +90,7 @@ export default function CodeDiff({
   const oldContent = getCodeContent(from?.content);
   const newContent = to ? getCodeContent(to.content) : {};
 
-  /*
-   * Removed code block.
-   */
+  
   if (!to) {
     return (
       <div className="space-y-3">
@@ -109,9 +107,7 @@ export default function CodeDiff({
     );
   }
 
-  /*
-   * Added code block.
-   */
+  
   if (!from) {
     return (
       <div className="space-y-3">
@@ -147,9 +143,7 @@ export default function CodeDiff({
     normalize(oldCode) !==
     normalize(newCode);
 
-  /*
-   * Nothing changed.
-   */
+  
   if (
     !languageChanged &&
     !codeChanged
@@ -170,14 +164,7 @@ export default function CodeDiff({
     newLines.length
   );
 
-  /*
-   * Simple line-by-line diff.
-   *
-   * This intentionally keeps the component
-   * lightweight. More advanced diff matching
-   * can be added later without changing the
-   * component API.
-   */
+  
   const lineChanges = [];
 
   for (

@@ -1,7 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
 import { requireContributor } from "@/lib/auth";
-import type { ArticleEditorSection, } from "@/types/article-editor";
+import { getCategories } from "@/lib/services/category.service";
+import type {
+  ArticleEditorInfobox,
+  ArticleEditorReference,
+  ArticleEditorSection,
+} from "@/types/article-editor";
 
 import {
   getArticleForEditing,
@@ -22,6 +27,29 @@ type PopulatedCategory = {
   description?: string;
 };
 
+type RevisionInfoboxField = {
+  label: string;
+  value: unknown;
+  order: number;
+};
+
+type RevisionInfobox = {
+  title?: string;
+  image?: string | null;
+  fields?: RevisionInfoboxField[];
+};
+
+type RevisionReference = {
+  _id?: string;
+  title?: string;
+  url?: string;
+  publisher?: string;
+  author?: string;
+  publishedAt?: Date | string;
+  accessedAt?: Date | string;
+  description?: string;
+};
+
 export default async function EditArticlePage({
   params,
 }: Props) {
@@ -33,9 +61,14 @@ export default async function EditArticlePage({
 
   const { slug } = await params;
 
-  const article =
-    await getArticleForEditing(slug);
+  const article = await getArticleForEditing(slug);
+  const allCategories = await getCategories();
 
+  const availableCategories = allCategories.map((category) => ({
+    _id: category._id.toString(),
+    name: category.name,
+    slug: category.slug,
+  }));
   if (!article) {
     notFound();
   }
@@ -69,19 +102,76 @@ export default async function EditArticlePage({
    */
   const revision = article.currentRevision;
 
-  const sections =
-  (revision?.sections as
-    | ArticleEditorSection[]
-    | undefined) ?? [];
+  const sections: ArticleEditorSection[] =
+    (revision?.sections ?? []).map(
+      (section: ArticleEditorSection) => ({
+        title: section.title,
+        level: section.level,
+        order: section.order,
+
+        blocks: (section.blocks ?? []).map(
+          (block) => ({
+            type: block.type,
+            content: block.content,
+            order: block.order,
+          })
+        ),
+      })
+    );
+
+    const infobox: ArticleEditorInfobox | null =
+  revision?.infobox
+    ? {
+        title: revision.infobox.title ?? "",
+        image:
+          revision.infobox.image ?? null,
+        fields: (
+          revision.infobox.fields ?? []
+        ).map((field: RevisionInfoboxField) => ({
+          label: field.label,
+          value:
+            typeof field.value === "string"
+              ? field.value
+              : String(field.value ?? ""),
+          order: field.order,
+        })),
+      }
+    : null;
+
+    const references: ArticleEditorReference[] =
+  (revision?.references ?? []).map(
+    (reference: RevisionReference) => ({
+      _id: reference._id
+        ? reference._id.toString()
+        : undefined,
+      title: reference.title ?? "",
+      url: reference.url ?? "",
+      publisher:
+        reference.publisher ?? "",
+      author: reference.author ?? "",
+      publishedAt:
+        reference.publishedAt
+          ? new Date(
+              reference.publishedAt
+            ).toISOString()
+          : undefined,
+      accessedAt:
+        reference.accessedAt
+          ? new Date(
+              reference.accessedAt
+            ).toISOString()
+          : undefined,
+      description:
+        reference.description ?? "",
+    })
+  );
+  const editSummary = revision?.editSummary ?? "";
 
   /**
    * Convert populated categories
    * into the shape expected by ArticleEditor.
    */
-  const revisionCategories =
-    (revision?.categories as
-      | PopulatedCategory[]
-      | undefined) ?? [];
+  const revisionCategories = (revision?.categories as | PopulatedCategory[] | undefined) ?? [];
 
   const categories = revisionCategories.map(
       (category) => ({
@@ -188,17 +278,16 @@ export default async function EditArticlePage({
       {/* Editor */}
       <ArticleEditor
         articleId={article._id.toString()}
-        revisionId={
-          revision?._id.toString() ?? ""
-        }
-        title={
-          revision?.title ?? article.title
-        }
-        summary={
-          revision?.summary ?? ""
-        }
+        revisionId={revision?._id.toString() ?? ""}
+        slug={slug}
+        title={revision?.title ?? article.title}
+        summary={revision?.summary ?? ""}
         categories={categories}
+        availableCategories={availableCategories}
         sections={sections}
+        infobox={infobox}
+        references={references}
+        editSummary={editSummary}
       />
     </div>
   );

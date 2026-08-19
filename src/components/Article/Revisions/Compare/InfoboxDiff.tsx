@@ -173,9 +173,7 @@ export default function InfoboxDiff({
   from,
   to,
 }: Props) {
-  /**
-   * Infobox added
-   */
+  
   if (!from && to) {
     return (
       <div className="rounded-lg border border-green-200 bg-green-50 p-5">
@@ -225,9 +223,7 @@ export default function InfoboxDiff({
     );
   }
 
-  /**
-   * Infobox removed
-   */
+  
   if (from && !to) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-5">
@@ -277,9 +273,7 @@ export default function InfoboxDiff({
     );
   }
 
-  /**
-   * Nothing to compare
-   */
+  
   if (!from || !to) {
     return null;
   }
@@ -290,12 +284,7 @@ export default function InfoboxDiff({
   const fieldsTo: InfoboxField[] =
     to.fields ?? [];
 
-  /**
-   * Match fields by label.
-   *
-   * We intentionally don't compare
-   * MongoDB _id values.
-   */
+  
   const fromMap = new Map(
     fieldsFrom.map((field) => [
       field.label,

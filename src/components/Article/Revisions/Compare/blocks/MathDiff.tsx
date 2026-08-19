@@ -46,9 +46,7 @@ export default function MathDiff({
     to?.content ?? ""
   );
 
-  /*
-   * Removed math block.
-   */
+  
   if (!to) {
     return (
       <div className="space-y-3">
@@ -64,9 +62,7 @@ export default function MathDiff({
     );
   }
 
-  /*
-   * No change.
-   */
+  
   if (oldValue === newValue) {
     return (
       <MathBox value={oldValue} />

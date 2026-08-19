@@ -289,7 +289,7 @@ export default async function RevisionPage({
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-slate-500">
           <Link
-            href={`/article/${article.slug}`}
+            href={`/articles/${article.slug}`}
             className="hover:text-blue-600 hover:underline"
           >
             {article.title}
@@ -298,7 +298,7 @@ export default async function RevisionPage({
           <span className="mx-2">›</span>
 
           <Link
-            href={`/article/${article.slug}/revisions`}
+            href={`/articles/${article.slug}/revisions`}
             className="hover:text-blue-600 hover:underline"
           >
             Revision history
@@ -340,7 +340,7 @@ export default async function RevisionPage({
 
             <div className="flex gap-2">
               <Link
-                href={`/article/${article.slug}/revisions`}
+                href={`/articles/${article.slug}/revisions`}
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 ← History
@@ -348,7 +348,7 @@ export default async function RevisionPage({
 
               {revision.version > 1 && (
                 <Link
-                  href={`/article/${article.slug}/compare?from=${
+                  href={`/articles/${article.slug}/compare?from=${
                     revision.version - 1
                   }&to=${revision.version}`}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -560,14 +560,14 @@ export default async function RevisionPage({
         {/* Bottom navigation */}
         <div className="mt-8 flex justify-between">
           <Link
-            href={`/article/${article.slug}/revisions`}
+            href={`/articles/${article.slug}/revisions`}
             className="text-sm font-medium text-blue-600 hover:underline"
           >
             ← Back to revision history
           </Link>
 
           <Link
-            href={`/article/${article.slug}`}
+            href={`/articles/${article.slug}`}
             className="text-sm font-medium text-blue-600 hover:underline"
           >
             View article →
