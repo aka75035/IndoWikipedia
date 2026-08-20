@@ -29,6 +29,12 @@ export const userSchema = z.object({
       100,
       "Display name cannot exceed 100 characters"
     ),
+    terms: z
+    .boolean()
+    .refine(
+      (value) => value === true,
+      "You must agree to the Terms & Conditions"
+    ),
 });
 
 export const loginSchema = z.object({
