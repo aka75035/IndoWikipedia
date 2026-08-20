@@ -16,7 +16,7 @@ export default function ArticleCard({
   return (
     <article className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
       <Link
-        href={`/article/${article.slug}`}
+        href={`/articles/${article.slug}`}
         className="block p-5"
       >
         <div className="flex items-start justify-between gap-4">

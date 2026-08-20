@@ -173,7 +173,7 @@ export default function FeaturedArticles({
                 >
                   <div className="min-w-0">
                     <Link
-                      href={`/article/${article.slug}`}
+                      href={`/articles/${article.slug}`}
                       target="_blank"
                       className="font-semibold text-slate-900 hover:text-blue-600"
                     >
@@ -240,7 +240,7 @@ export default function FeaturedArticles({
               >
                 <div className="min-w-0">
                   <Link
-                    href={`/article/${article.slug}`}
+                    href={`/articles/${article.slug}`}
                     target="_blank"
                     className="font-medium text-slate-900 hover:text-blue-600"
                   >
