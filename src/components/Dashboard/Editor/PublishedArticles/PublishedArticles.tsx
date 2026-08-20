@@ -187,7 +187,7 @@ export default function PublishedArticles({
                       {/* Article */}
                       <div className="min-w-0">
                         <Link
-                          href={`/article/${article.slug}`}
+                          href={`/articles/${article.slug}`}
                           className="text-base font-semibold text-slate-900 hover:text-blue-600"
                         >
                           {article.title}
@@ -236,7 +236,7 @@ export default function PublishedArticles({
                       {/* Actions */}
                       <div className="flex gap-2">
                         <Link
-                          href={`/article/${article.slug}`}
+                          href={`/articles/${article.slug}`}
                           target="_blank"
                           className="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white"
                         >

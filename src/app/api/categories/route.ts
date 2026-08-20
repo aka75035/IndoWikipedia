@@ -111,8 +111,7 @@ export async function POST(
     /**
      * Create category
      */
-    const category =
-      await createCategory(
+    const category = await createCategory(
         result.data,
         auth.user._id.toString()
       );
