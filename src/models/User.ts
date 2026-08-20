@@ -40,7 +40,10 @@ const UserSchema = new Schema(
       default: "",
       maxlength: 1000,
     },
-
+    terms: {
+      type: Boolean,
+      defaut:false,
+    },
     role: {
       type: String,
       enum: [
