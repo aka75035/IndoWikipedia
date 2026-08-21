@@ -15,6 +15,7 @@ import { useState } from "react";
 import ProfileForm from "./ProfileForm";
 import ChangePasswordForm from "./ChangePasswordForm";
 import type { ProfileUser } from "@/types/profile";
+import Image from "next/image";
 
 type Props = {
   user: ProfileUser;
@@ -70,9 +71,11 @@ export default function ProfilePage({
             <div className="relative">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-blue-600 text-3xl font-bold text-white shadow-lg sm:h-28 sm:w-28">
                 {user.avatar ? (
-                  <img
+                  <Image
                     src={user.avatar}
                     alt={user.displayName}
+                    width={800}
+                    height={450}
                     className="h-full w-full object-cover"
                   />
                 ) : (

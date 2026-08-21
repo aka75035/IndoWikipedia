@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 type SearchBarProps = {
   search: string;
@@ -15,16 +16,52 @@ export default function SearchBar({
   basePath = "/search",
 }: SearchBarProps) {
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function onKeyDown(
     e: React.KeyboardEvent<HTMLInputElement>
   ) {
     if (e.key === "Enter") {
+      const query = search.trim();
+
+      if (!query) return;
+
       router.push(
-        `${basePath}?q=${encodeURIComponent(search)}`
+        `${basePath}?q=${encodeURIComponent(query)}`
       );
     }
   }
+
+  useEffect(() => {
+    function handleShortcut(e: KeyboardEvent) {
+      // Ctrl + K / Cmd + K
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.key.toLowerCase() === "k"
+      ) {
+        e.preventDefault();
+
+        inputRef.current?.focus();
+      }
+
+      // Escape
+      if (e.key === "Escape") {
+        inputRef.current?.blur();
+      }
+    }
+
+    window.addEventListener(
+      "keydown",
+      handleShortcut
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleShortcut
+      );
+    };
+  }, []);
 
   return (
     <div
@@ -50,6 +87,7 @@ export default function SearchBar({
       />
 
       <input
+        ref={inputRef}
         className="
           min-w-0
           flex-1
@@ -84,7 +122,7 @@ export default function SearchBar({
           text-black/60
           md:block
 
-          dark:border-white/20  
+          dark:border-white/20
           dark:bg-white/10
           dark:text-white/60
         "

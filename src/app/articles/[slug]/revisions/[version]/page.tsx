@@ -10,6 +10,7 @@ import {
 
 import { canViewArticle } from "@/lib/services/article-permissions";
 import Image from "next/image";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
@@ -76,6 +77,46 @@ type RevisionMedia = {
   type?: string;
   url?: string;
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { slug, version: versionParam } = await params;
+
+  const version = Number(versionParam);
+
+  if (!Number.isInteger(version) || version < 1) {
+    return {
+      title: "Revision",
+    };
+  }
+
+  const article = await getArticle(slug);
+
+  if (!article) {
+    return {
+      title: "Revision",
+    };
+  }
+
+  const revision = await getRevision(
+    article._id.toString(),
+    version
+  );
+
+  if (!revision) {
+    return {
+      title: "Revision",
+    };
+  }
+
+  return {
+    title: `${revision.title} — Revision ${revision.version}`,
+    description:
+      revision.summary ||
+      `View revision ${revision.version} of ${revision.title} on IndoWikipedia.`,
+  };
+}
 
 function isRecord(
   value: unknown
@@ -226,6 +267,10 @@ function getStringContent(
     ? content
     : String(content ?? "");
 }
+
+
+
+
 
 export default async function RevisionPage({
   params,

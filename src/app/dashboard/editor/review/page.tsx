@@ -8,6 +8,17 @@ import {
 } from "@/lib/services/dashboard/editor.service";
 
 import ReviewQueue from "@/components/Dashboard/Editor/ReviewQueue/ReviewQueue";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Review Queue",
+  description:
+    "Review articles submitted by contributors before publication on IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function EditorReviewQueuePage() {
   const auth = await requireEditor();

@@ -1,4 +1,12 @@
 import  Link  from "next/link";
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Learn about IndoWikipedia, its vision, technology, development, and creator.",
+};
+
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-12 sm:px-8 lg:px-10">
@@ -367,7 +375,7 @@ export default function AboutPage() {
 
             {/* Basic Info */}
             <div>
-              <a
+              <Link
                 href="https://portfolio-tau-coral.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -376,7 +384,7 @@ export default function AboutPage() {
                 <h3 className="text-2xl font-semibold transition hover:underline">
                   Akash Yadav
                 </h3>
-              </a>
+              </Link>
 
               <p className="mt-1 text-gray-500">
                 Founder & Full-Stack Developer
@@ -491,32 +499,32 @@ export default function AboutPage() {
             </h4>
 
             <div className="mt-4 flex flex-wrap gap-3">
-              <a
+              <Link
                 href="https://portfolio-tau-coral.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               >
                 Portfolio
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="https://github.com/aka75035"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               >
                 GitHub
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="https://www.linkedin.com/in/akash-yadav-717557291/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               >
                 LinkedIn
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -634,14 +642,14 @@ export default function AboutPage() {
         />
 
         <div className="mt-6 flex flex-wrap gap-4">
-          <a
+          <Link
             href="https://github.com/aka75035/IndoWikipedia"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg border px-5 py-3 text-sm font-medium transition hover:bg-gray-50"
           >
             GitHub Repository
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -681,7 +689,7 @@ export default function AboutPage() {
   );
 }
 
-function SectionTitle({ eyebrow, title }) {
+function SectionTitle({ eyebrow, title }:{ eyebrow: string, title: string }) {
   return (
     <div>
       <p className="text-sm font-medium uppercase tracking-widest text-gray-400">
@@ -695,7 +703,7 @@ function SectionTitle({ eyebrow, title }) {
   );
 }
 
-function FeatureCard({ title, description }) {
+function FeatureCard({ title, description }:{ title: string; description: string; }) {
   return (
     <div className="rounded-2xl border p-6">
       <h3 className="font-semibold">{title}</h3>
@@ -707,7 +715,7 @@ function FeatureCard({ title, description }) {
   );
 }
 
-function TechCard({ name, description }) {
+function TechCard({ name, description }:{ name: string; description: string; }) {
   return (
     <div className="rounded-2xl border p-6">
       <h3 className="text-lg font-semibold">{name}</h3>
@@ -719,7 +727,7 @@ function TechCard({ name, description }) {
   );
 }
 
-function TimelineItem({ number, title, description }) {
+function TimelineItem({ number, title, description }:{ number: string; title: string; description: string; }) {
   return (
     <div className="flex gap-5 border-b py-6 last:border-b-0">
       <span className="text-sm font-semibold text-gray-400">
@@ -737,8 +745,18 @@ function TimelineItem({ number, title, description }) {
   );
 }
 
-function RoadmapItem({ status, title }) {
-  const statusStyles = {
+
+
+type RoadmapStatus = "Completed" | "In Progress" | "Planned";
+
+function RoadmapItem({
+  status,
+  title,
+}: {
+  status: RoadmapStatus;
+  title: string;
+}) {
+  const statusStyles: Record<RoadmapStatus, string> = {
     Completed: "bg-green-50 text-green-700",
     "In Progress": "bg-yellow-50 text-yellow-700",
     Planned: "bg-gray-100 text-gray-600",
@@ -749,7 +767,9 @@ function RoadmapItem({ status, title }) {
       <span className="font-medium">{title}</span>
 
       <span
-        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${statusStyles[status]}`}
+        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+          statusStyles[status]
+        }`}
       >
         {status}
       </span>

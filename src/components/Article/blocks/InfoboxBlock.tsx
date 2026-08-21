@@ -1,6 +1,7 @@
 import type {
   InfoboxBlockContent,
 } from "@/types/article-editor";
+import Image from "next/image";
 
 type Props = {
   content: InfoboxBlockContent;
@@ -28,10 +29,11 @@ export default function InfoboxBlock({
 
       {content.image && (
         <div className="border-b border-slate-300 bg-white p-4">
-          <img
+          <Image
             src={content.image}
-            alt={content.title}
-            loading="lazy"
+            alt={content.title ?? ""}
+            width={800}
+            height={450}
             className="mx-auto max-h-72 w-full object-contain"
           />
         </div>

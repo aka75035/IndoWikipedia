@@ -9,13 +9,11 @@ import type {
   ArticleEditorCategory,
   ArticleEditorSection,
 } from "@/types/article-editor";
-import Category from "@/models/Category";
+import Image from "next/image";
 
 
 
 export default function ArticleEditor({
-  articleId,
-  revisionId,
   slug,
   title: initialTitle,
   summary: initialSummary,
@@ -798,9 +796,11 @@ export default function ArticleEditor({
 
               {infobox.image && (
                 <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-                  <img
+                  <Image
                     src={infobox.image}
-                    alt={infobox.title}
+                    alt={infobox.title ?? ""}
+                    width={800}
+                    height={450}
                     className="mx-auto max-h-72 object-contain"
                   />
                 </div>
@@ -926,9 +926,11 @@ export default function ArticleEditor({
 
                 {infobox.image && (
                   <div className="border-b border-slate-200 p-4">
-                    <img
+                    <Image
                       src={infobox.image}
-                      alt={infobox.title}
+                      alt={infobox.title ?? ""}
+                      width={800}
+                      height={450}
                       className="mx-auto max-h-64 object-contain"
                     />
                   </div>

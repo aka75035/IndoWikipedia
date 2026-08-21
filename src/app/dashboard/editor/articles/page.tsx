@@ -5,6 +5,7 @@ import { requireEditor } from "@/lib/auth";
 import { getPublishedArticles,} from "@/lib/services/article.service";
 
 import PublishedArticles from "@/components/Dashboard/Editor/PublishedArticles/PublishedArticles";
+import { Metadata } from "next";
 
 type Props = {
   searchParams: Promise<{
@@ -12,6 +13,16 @@ type Props = {
     q?: string;
     category?: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Published Articles",
+  description:
+    "Manage published articles on IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function PublishedArticlesPage({

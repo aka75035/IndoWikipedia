@@ -9,11 +9,22 @@ import {
 import ArticlePage from "@/components/Article/ArticlePage";
 
 import ArticleReviewActions from "@/components/Dashboard/Editor/ArticleReview/ArticleReviewActions";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
     slug: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Article Review",
+  description:
+    "Review a contributor-submitted article before publication on IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function EditorReviewPage({

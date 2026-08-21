@@ -5,6 +5,17 @@ import { requireModerator } from "@/lib/auth";
 import {
   getModeratorStats,
 } from "@/lib/services/dashboard/moderator.service";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Moderator Dashboard",
+  description:
+    "Manage reports, flagged content, and community moderation on IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function ModeratorDashboard() {
   const auth = await requireModerator();

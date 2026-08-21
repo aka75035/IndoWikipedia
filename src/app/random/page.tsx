@@ -5,11 +5,15 @@ import {
 } from "@/lib/services/article.service";
 
 import ArticlePage from "@/components/Article/ArticlePage";
+import { Metadata } from "next";
 
 type ArticleCategory = {
   _id: string | { toString(): string };
   name: string;
   slug: string;
+};
+export const metadata: Metadata = {
+  title: "Random Article",
 };
 
 export default async function RandomArticleRoute() {
@@ -29,7 +33,8 @@ export default async function RandomArticleRoute() {
         slug: category.slug,
       })
     ) ?? [];
-
+  
+    
   return (
     <ArticlePage
       title={revision.title}

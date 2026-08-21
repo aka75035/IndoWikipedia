@@ -3,6 +3,17 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 
 import { getAdminStats } from "@/lib/services/dashboard/admin.service";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+  description:
+    "Manage IndoWikipedia users, articles, categories, moderation, and platform content.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function AdminDashboard() {
   const auth = await requireAdmin();

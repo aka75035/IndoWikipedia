@@ -17,8 +17,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IndoWikipedia",
-  description: "A Wikipedia-style knowledge platform",
+  title: {
+    default: "IndoWikipedia",
+    template: "%s | IndoWikipedia",
+  },
+  description: "The free encyclopedia of India",
 };
 
 export default async function RootLayout({

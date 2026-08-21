@@ -12,6 +12,7 @@ import { canViewArticle } from "@/lib/services/article-permissions";
 import SectionChanges from "@/components/Article/Revisions/Compare/SectionChanges";
 import InfoboxChanges from "@/components/Article/Revisions/Compare/InfoboxChanges";
 import ReferenceChanges from "@/components/Article/Revisions/Compare/ReferenceChanges";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
@@ -24,6 +25,42 @@ type Props = {
   }>;
 };
 
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const query = await searchParams;
+
+  const from = Number(query.from);
+  const to = Number(query.to);
+
+  const article = await getArticle(slug);
+
+  if (!article) {
+    return {
+      title: "Compare Revisions",
+    };
+  }
+
+  if (
+    !Number.isInteger(from) ||
+    !Number.isInteger(to) ||
+    from < 1 ||
+    to < 1 ||
+    from === to
+  ) {
+    return {
+      title: `Compare Revisions: ${article.title}`,
+      description: `Compare revisions of ${article.title} on IndoWikipedia.`,
+    };
+  }
+
+  return {
+    title: `Compare Revisions: ${article.title}`,
+    description: `Compare revision ${from} with revision ${to} of ${article.title} on IndoWikipedia.`,
+  };
+}
 
 function displayValue(value: unknown): string {
   if (value === null || value === undefined) {

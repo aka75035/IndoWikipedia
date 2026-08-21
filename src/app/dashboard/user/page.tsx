@@ -1,6 +1,17 @@
 import { redirect } from "next/navigation";
 
 import {requireLoggedInUser} from "@/lib/auth";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "User Dashboard",
+  description:
+    "Manage your IndoWikipedia account and activity.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function UserDashboard() {
   const auth = await requireLoggedInUser();

@@ -1,6 +1,13 @@
 import Link from "next/link";
 
 import { getCategories } from "@/lib/services/category.service";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Categories",
+  description:
+    "Browse all categories and discover articles by topic on IndoWikipedia.",
+}
 
 export default async function CategoriesPage() {
   const categories = await getCategories();

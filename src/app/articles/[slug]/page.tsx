@@ -5,6 +5,7 @@ import {
 } from "@/lib/services/article.service";
 
 import ArticlePage from "@/components/Article/ArticlePage";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
@@ -17,6 +18,29 @@ type ArticleCategory = {
   name: string;
   slug: string;
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const article = await getPublishedArticle(slug);
+
+  if (!article || !article.currentRevision) {
+    return {
+      title: "Article Not Found",
+    };
+  }
+
+  const revision = article.currentRevision;
+
+  return {
+    title: revision.title,
+    description:
+      revision.summary ||
+      `Read ${revision.title} on IndoWikipedia.`,
+  };
+}
 
 export default async function ArticleRoute({
   params,
@@ -33,8 +57,7 @@ export default async function ArticleRoute({
     notFound();
   }
 
-  const revision =
-    article.currentRevision;
+  const revision = article.currentRevision;
 
   const categories =
     (revision.categories as ArticleCategory[] | undefined)?.map(

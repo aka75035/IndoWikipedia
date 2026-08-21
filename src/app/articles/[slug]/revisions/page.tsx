@@ -9,6 +9,7 @@ import {
 } from "@/lib/services/article.service";
 
 import { canViewArticle } from "@/lib/services/article-permissions";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
@@ -32,6 +33,25 @@ type Revision = {
     avatar: string | null;
   };
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const article = await getArticle(slug);
+
+  if (!article) {
+    return {
+      title: "Revision History",
+    };
+  }
+
+  return {
+    title: `Revision History: ${article.title}`,
+    description: `View the revision history and changes made to ${article.title} on IndoWikipedia.`,
+  };
+}
 
 export default async function RevisionHistoryPage({
   params,

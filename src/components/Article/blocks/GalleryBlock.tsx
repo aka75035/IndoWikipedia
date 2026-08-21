@@ -1,6 +1,7 @@
 import type {
   GalleryBlockContent,
 } from "@/types/article-editor";
+import Image from "next/image";
 
 type Props = {
   content: GalleryBlockContent;
@@ -21,10 +22,11 @@ export default function GalleryBlock({
           className="min-w-0"
         >
           <div className="overflow-hidden bg-slate-50">
-            <img
+            <Image
               src={image.url}
               alt={image.alt}
-              loading="lazy"
+              width={800}
+              height={450}
               className="aspect-[4/3] w-full object-cover transition-transform duration-200 hover:scale-[1.02]"
             />
           </div>
