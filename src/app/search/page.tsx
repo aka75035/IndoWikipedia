@@ -1,5 +1,6 @@
 import ArticleCard from "@/components/Article/ArticleCard";
 import { searchArticles } from "@/lib/articles";
+import { Metadata } from "next";
 import Link from "next/link";
 
 type Props = {
@@ -7,6 +8,12 @@ type Props = {
     q?: string;
     page?: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Search",
+  description:
+    "Search IndoWikipedia for articles and information about India.",
 };
 
 export default async function SearchPage({

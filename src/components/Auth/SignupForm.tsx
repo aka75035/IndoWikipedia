@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -63,9 +65,21 @@ export default function SignUpForm() {
       setLoading(false);
     }
   }
+  function handleOutsideClick(e: MouseEvent<HTMLDivElement>) {
+  if (e.target === e.currentTarget) {
+    router.back();
+  }
+}
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <main
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={handleOutsideClick}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
       <form
         onSubmit={handleSubmit}
         className="flex w-full max-w-md flex-col gap-4 rounded-xl bg-white p-8 shadow-2xl"
@@ -215,5 +229,6 @@ export default function SignUpForm() {
         </button>
       </form>
     </div>
+    </main>
   );
 }

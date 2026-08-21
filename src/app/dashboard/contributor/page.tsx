@@ -8,6 +8,17 @@ import {
   getContributorStats,
 } from "@/lib/services/dashboard/contributor.service";
 import SubmitForReviewButton from "@/components/Dashboard/Contributor/SubmitForReviewButton";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contributor Dashboard",
+  description:
+    "Create, manage, and track your IndoWikipedia articles.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function ContributorDashboard() {
   const auth = await requireContributor();

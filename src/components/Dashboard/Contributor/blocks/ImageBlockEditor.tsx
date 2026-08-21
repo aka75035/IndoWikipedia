@@ -3,6 +3,7 @@
 import type {
   ImageBlockContent,
 } from "@/types/article-editor";
+import Image from "next/image";
 
 type Props = {
   content: ImageBlockContent;
@@ -82,9 +83,11 @@ export default function ImageBlockEditor({
 
       {content.url && (
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
-          <img
+          <Image
             src={content.url}
             alt={content.alt}
+            width={800}
+            height={450}
             className="mx-auto max-h-72 object-contain"
           />
 

@@ -13,6 +13,7 @@ import {
 } from "@/lib/services/article.service";
 
 import ArticleEditor from "@/components/Dashboard/Contributor/ArticleEditor";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
@@ -33,12 +34,6 @@ type RevisionInfoboxField = {
   order: number;
 };
 
-type RevisionInfobox = {
-  title?: string;
-  image?: string | null;
-  fields?: RevisionInfoboxField[];
-};
-
 type RevisionReference = {
   _id?: string;
   title?: string;
@@ -50,6 +45,14 @@ type RevisionReference = {
   description?: string;
 };
 
+export const metadata: Metadata = {
+  title: "Edit Article",
+  description: "Edit and manage your IndoWikipedia article.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 export default async function EditArticlePage({
   params,
 }: Props) {

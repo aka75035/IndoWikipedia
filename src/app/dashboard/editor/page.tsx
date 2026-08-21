@@ -6,6 +6,17 @@ import { requireEditor } from "@/lib/auth";
 import {
   getEditorStats,
 } from "@/lib/services/dashboard/editor.service";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Editor Dashboard",
+  description:
+    "Manage editorial work, published content, featured articles, and contributors on IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function EditorDashboard() {
   const auth = await requireEditor();

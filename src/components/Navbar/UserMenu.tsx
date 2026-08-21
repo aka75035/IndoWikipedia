@@ -13,7 +13,6 @@ import {
   FolderTree,
   Users,
   Plus,
-  LogIn,
 } from "lucide-react";
 
 import LogoutButton from "../Auth/LogoutButton";

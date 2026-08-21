@@ -3,6 +3,7 @@
 import type {
   GalleryBlockContent,
 } from "@/types/article-editor";
+import Image from "next/image";
 
 type Props = {
   content: GalleryBlockContent;
@@ -126,9 +127,11 @@ export default function GalleryBlockEditor({
               />
 
               {image.url && (
-                <img
+                <Image
                   src={image.url}
                   alt={image.alt}
+                  width={800}
+                  height={450}
                   className="mx-auto max-h-64 rounded-lg object-contain"
                 />
               )}

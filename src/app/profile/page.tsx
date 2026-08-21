@@ -2,6 +2,13 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
 import ProfilePage from "@/components/Profile/ProfilePage";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profile",
+  description:
+    "Manage your IndoWikipedia profile and account information.",
+};
 
 export default async function ProfileRoute() {
   const user = await getCurrentUser();

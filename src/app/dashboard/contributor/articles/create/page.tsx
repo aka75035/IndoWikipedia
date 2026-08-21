@@ -3,7 +3,17 @@ import { redirect } from "next/navigation";
 import { requireContributor } from "@/lib/auth";
 
 import CreateArticleForm from "@/components/Dashboard/Contributor/CreateArticleForm";
+import { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Create Article",
+  description:
+    "Create a new article for IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 export default async function CreateArticlePage() {
   const auth = await requireContributor();
 

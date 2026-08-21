@@ -5,6 +5,17 @@ import { requireEditor } from "@/lib/auth";
 import {getPublishedArticles} from "@/lib/services/article.service";
 
 import FeaturedArticles from "@/components/Dashboard/Editor/FeaturedArticles/FeaturedArticles";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Featured Articles",
+  description:
+    "Manage featured articles on IndoWikipedia.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function EditorFeaturedPage() {
   const auth = await requireEditor();

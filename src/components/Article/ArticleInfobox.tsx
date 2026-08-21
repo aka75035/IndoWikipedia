@@ -1,6 +1,7 @@
 import type {
   ArticleEditorInfobox,
 } from "@/types/article-editor";
+import Image from "next/image";
 
 type Props = {
   infobox: ArticleEditorInfobox | null;
@@ -32,10 +33,11 @@ export default function ArticleInfobox({
       
       {infobox.image && (
         <div className="border-b border-slate-300 bg-white p-3">
-          <img
+          <Image
             src={infobox.image}
             alt={infobox.title}
-            loading="lazy"
+            width={800}
+            height={450}
             className="mx-auto max-h-72 w-auto max-w-full object-contain"
           />
         </div>

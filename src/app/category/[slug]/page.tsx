@@ -2,12 +2,34 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getCategory, getArticlesByCategory, } from "@/lib/services/category.service";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
     slug: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  const category = await getCategory(slug);
+
+  if (!category) {
+    return {
+      title: "Category Not Found",
+    };
+  }
+
+  return {
+    title: category.name,
+    description:
+      category.description ||
+      `Explore articles in the ${category.name} category on IndoWikipedia.`,
+  };
+}
 
 export default async function CategoryPage({
   params,
@@ -20,8 +42,7 @@ export default async function CategoryPage({
     notFound();
   }
 
-  const articles =
-    await getArticlesByCategory(slug);
+  const articles = await getArticlesByCategory(slug);
 
   return (
     <main className="min-h-screen bg-slate-50">
