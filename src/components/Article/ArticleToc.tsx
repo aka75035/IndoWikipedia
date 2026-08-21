@@ -28,7 +28,7 @@ export default function ArticleToc({
   return (
     <nav
       aria-label="Table of contents"
-      className="w-full"
+      className="hidden md:block md:w-full"
     >
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
         Contents
@@ -37,10 +37,7 @@ export default function ArticleToc({
       <ol className="mt-3 border-l border-slate-200">
         {sortedSections.map(
           (section, index) => {
-            const sectionId =
-              createSectionId(
-                section.title
-              );
+            const sectionId = createSectionId(section.title);
 
             return (
               <li

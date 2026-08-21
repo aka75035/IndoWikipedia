@@ -492,8 +492,7 @@ export async function createRevision(
     /**
      * Update current revision
      */
-    article.currentRevision =
-      revision._id;
+    article.currentRevision = revision._id;
 
     if (
       article.status === "published"
@@ -961,4 +960,50 @@ export async function requestArticleChanges(
   await article.save();
 
   return article;
+}
+
+export async function getRandomPublishedArticle() {
+  await connectDB();
+
+  const result = await Article.aggregate([
+    {
+      $match: {
+        status: "published",
+      },
+    },
+    {
+      $sample: {
+        size: 1,
+      },
+    },
+  ]);
+
+  if (!result.length) {
+    return null;
+  }
+
+  return Article.findById(result[0]._id)
+    .select(
+      "title slug status createdBy currentRevision publishedAt updatedAt"
+    )
+    .populate(
+      "createdBy",
+      "username displayName avatar bio"
+    )
+    .populate({
+      path: "currentRevision",
+      populate: [
+        {
+          path: "createdBy",
+          select: "username displayName avatar",
+          model: User,
+        },
+        {
+          path: "categories",
+          select: "name slug description",
+          model: Category,
+        },
+      ],
+    })
+    .lean();
 }
